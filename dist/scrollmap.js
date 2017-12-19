@@ -5,7 +5,7 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 var config = {
-    mapboxID: 'abc'
+    mapboxAccessToken: 'pk.eyJ1IjoiYW9zaWthIiwiYSI6IjQzRGIxeEkifQ.7OvmyBbXwwt9Qxjlh9Qd3w'
 };
 
 exports.default = config;
@@ -18,6 +18,17 @@ var _config = require('../config');
 var _config2 = _interopRequireDefault(_config);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var map = void 0;
+
+mapboxgl.accessToken = _config2.default.mapboxAccessToken;
+map = new mapboxgl.Map({
+    container: 'scrollmap', // container id
+    style: 'mapbox://styles/aosika/cj4nes30j8qyl2qmqlc7ob06i', //stylesheet location
+    // style: 'mapbox://styles/aosika/cj5q0qvf91f522smitgudhh9n',
+    center: [100, 30], // starting position (lng, lat),
+    zoom: 3
+});
 
 },{"../config":1}]},{},[2])(2)
 });
