@@ -14,7 +14,9 @@ import config from '../config';
 // that are not closed properly.
 // the anonymous function protects the `$` alias from name collisions
 ;(function( $, window, document, undefined ) {
-
+    /**
+     * 
+     */
     let pluginName = 'Scrollmap';
 
     /**
@@ -24,6 +26,9 @@ import config from '../config';
 
     }
 
+    /**
+     * 
+     */
     let Scrollmap = function( userOptions ) {
         this.options = $.extend( {}, defaultOptions, userOptions );
         this.init();
@@ -34,6 +39,9 @@ import config from '../config';
         }
     }
 
+    /**
+     * 
+     */
     Scrollmap.prototype = {
         /**
          * 
@@ -48,13 +56,7 @@ import config from '../config';
             let map;
 
             mapboxgl.accessToken = config.mapboxAccessToken;
-            map = new mapboxgl.Map({
-                container: 'scrollmap', // container id
-                style: 'mapbox://styles/aosika/cj4nes30j8qyl2qmqlc7ob06i', //stylesheet location
-                // style: 'mapbox://styles/aosika/cj5q0qvf91f522smitgudhh9n',
-                center: [100, 30], // starting position (lng, lat),
-                zoom: 3
-            });
+            map = new mapboxgl.Map(this.options.mapboxConfig);
 
             new Promise((resolve, reject) => {
                 map.on('load', () => {

@@ -32,7 +32,9 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 // https://github.com/jquery-boilerplate/jquery-patterns/blob/master/patterns/jquery.basic.plugin-boilerplate.js
 
 (function ($, window, document, undefined) {
-
+    /**
+     * 
+     */
     var pluginName = 'Scrollmap';
 
     /**
@@ -40,6 +42,9 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
      */
     var defaultOptions = {};
 
+    /**
+     * 
+     */
     var Scrollmap = function Scrollmap(userOptions) {
         this.options = $.extend({}, defaultOptions, userOptions);
         this.init();
@@ -50,6 +55,9 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
         };
     };
 
+    /**
+     * 
+     */
     Scrollmap.prototype = {
         /**
          * 
@@ -67,13 +75,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
             var map = void 0;
 
             mapboxgl.accessToken = _config2.default.mapboxAccessToken;
-            map = new mapboxgl.Map({
-                container: 'scrollmap', // container id
-                style: 'mapbox://styles/aosika/cj4nes30j8qyl2qmqlc7ob06i', //stylesheet location
-                // style: 'mapbox://styles/aosika/cj5q0qvf91f522smitgudhh9n',
-                center: [100, 30], // starting position (lng, lat),
-                zoom: 3
-            });
+            map = new mapboxgl.Map(this.options.mapboxConfig);
 
             new Promise(function (resolve, reject) {
                 map.on('load', function () {
