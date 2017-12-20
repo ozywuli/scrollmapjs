@@ -23,14 +23,19 @@ import config from '../config';
      * Default Options
      */
     let defaultOptions = {
-
+        mapboxConfig: {
+            container: 'scrollmap',
+            style: 'mapbox://styles/aosika/cj8tmsx9cdk3m2rqmxbq8gr1b',
+            center: [0, 0],
+            zoom: 1
+        }
     }
 
     /**
      * 
      */
     let Scrollmap = function( userOptions ) {
-        this.options = $.extend( {}, defaultOptions, userOptions );
+        this.options = $.extend( true, defaultOptions, userOptions );
         this.init();
         this.controller = {
             afterMapInstantiation(map) {

@@ -40,13 +40,19 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
     /**
      * Default Options
      */
-    var defaultOptions = {};
+    var defaultOptions = {
+        mapboxConfig: {
+            container: 'scrollmap',
+            style: 'mapbox://styles/aosika/cj8tmsx9cdk3m2rqmxbq8gr1b',
+            center: [0, 0],
+            zoom: 1
+        }
 
-    /**
-     * 
-     */
-    var Scrollmap = function Scrollmap(userOptions) {
-        this.options = $.extend({}, defaultOptions, userOptions);
+        /**
+         * 
+         */
+    };var Scrollmap = function Scrollmap(userOptions) {
+        this.options = $.extend(true, defaultOptions, userOptions);
         this.init();
         this.controller = {
             afterMapInstantiation: function afterMapInstantiation(map) {
