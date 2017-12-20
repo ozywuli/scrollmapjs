@@ -19,16 +19,77 @@ var _config2 = _interopRequireDefault(_config);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var map = void 0;
+// the semi-colon before the function invocation is a safety
+// net against concatenated scripts and/or other plugins
+// that are not closed properly.
+// the anonymous function protects the `$` alias from name collisions
+; /**
+   * Scrollmap.js
+   * @author Ozy Wu-Li - @ousikaa
+   * @description Scrolling map
+   */
 
-mapboxgl.accessToken = _config2.default.mapboxAccessToken;
-map = new mapboxgl.Map({
-    container: 'scrollmap', // container id
-    style: 'mapbox://styles/aosika/cj4nes30j8qyl2qmqlc7ob06i', //stylesheet location
-    // style: 'mapbox://styles/aosika/cj5q0qvf91f522smitgudhh9n',
-    center: [100, 30], // starting position (lng, lat),
-    zoom: 3
-});
+// https://github.com/jquery-boilerplate/jquery-patterns/blob/master/patterns/jquery.basic.plugin-boilerplate.js
+
+(function ($, window, document, undefined) {
+
+    var pluginName = 'Scrollmap';
+
+    /**
+     * Default Options
+     */
+    var defaultOptions = {};
+
+    var Scrollmap = function Scrollmap(userOptions) {
+        this.options = $.extend({}, defaultOptions, userOptions);
+        this.init();
+        this.controller = {
+            afterMapInstantiation: function afterMapInstantiation(map) {
+                this.loaded(map);
+            }
+        };
+    };
+
+    Scrollmap.prototype = {
+        /**
+         * 
+         */
+        init: function init() {
+            this.instantiateMap();
+        },
+
+        /**
+         * 
+         */
+        instantiateMap: function instantiateMap() {
+            var _this = this;
+
+            var map = void 0;
+
+            mapboxgl.accessToken = _config2.default.mapboxAccessToken;
+            map = new mapboxgl.Map({
+                container: 'scrollmap', // container id
+                style: 'mapbox://styles/aosika/cj4nes30j8qyl2qmqlc7ob06i', //stylesheet location
+                // style: 'mapbox://styles/aosika/cj5q0qvf91f522smitgudhh9n',
+                center: [100, 30], // starting position (lng, lat),
+                zoom: 3
+            });
+
+            new Promise(function (resolve, reject) {
+                map.on('load', function () {
+                    resolve();
+                });
+            }).then(function () {
+                _this.controller.afterMapInstantiation(map);
+            });
+        }
+    };
+
+    /*------------------------------------*\
+      Export 
+    \*------------------------------------*/
+    module.exports = Scrollmap;
+})(jQuery, window, document);
 
 },{"../config":1}]},{},[2])(2)
 });

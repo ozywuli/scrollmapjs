@@ -30,7 +30,16 @@
 
 <!-- scripts -->
 <script src="./scrollmap.js"></script>
+
 <script>
+let myScrollmap = new Scrollmap({
+    mapboxToken: 'abc'
+});
+
+myScrollmap.controller.loaded = (map) => {
+    console.log(map);
+}
+
 
 </script>
 
