@@ -19,8 +19,44 @@
 </head>
 <body>
 
-<div id="scrollmap" class="scrollmap"></div>
-
+<div class="scrollmap-container">
+    <!-- Map -->
+    <div id="scrollmap" class="scrollmap-map"></div>
+    <!-- Panes -->
+    <div class="scrollmap-panes">    
+        <!-- Pane -->
+        <section 
+            class="scrollmap-pane"
+            data-id="burj-khalife"
+        >
+            <div class="scrollmap-pane__container">
+                <header class="scrollmap-pane__head">
+                    <h2 class="scrollmap-pane__title">
+                        Burj Khalifa
+                    </h2>
+                    <h3 class="scrollmap-pane__subtitle">
+                        The Tallest Building In The World
+                    </h3>
+                </header>
+                <figure class="scrollmap-pane__fig">
+                    <div class="scrollmap-pane__fig-container">
+                        <div class="scrollmap-pane__fig-frame">
+                            <img src="http://placehold.it/400x225" alt="image" class="scrollmap-pane__fig-img">
+                        </div>
+                        <figcaption class="scrollmap-pane__caption">
+                            Image caption
+                        </figcaption>
+                    </div>
+                </figure>
+                <div class="scrollmap-pane__content">
+                    <p class="scrollmap-pane__description">
+                        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Eveniet tenetur dignissimos optio consequatur hic eius placeat odit est sed, veniam illum, voluptas ad a? Molestiae, ipsam reprehenderit. Tempore explicabo, reprehenderit.
+                    </p>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
 
 
 <!-- vendor scripts -->
@@ -32,19 +68,25 @@
 <script src="./scrollmap.js"></script>
 
 <script>
-let myScrollmap = new Scrollmap({
-    mapboxToken: 'abc',
-    mapboxConfig: {
-        container: 'scrollmap', // container id
-        style: 'mapbox://styles/aosika/cjbepjvcn94182rmrjfnpudra', //stylesheet location
-        center: [100, 30], // starting position (lng, lat),
-        zoom: 3
+
+$.getJSON('/data/markers.json', (data) => {
+    let myScrollmap = new Scrollmap({
+        geojson: data,
+        mapboxToken: 'abc',
+        mapboxConfig: {
+            container: 'scrollmap', // container id
+            style: 'mapbox://styles/aosika/cjbepjvcn94182rmrjfnpudra', //stylesheet location
+            center: [100, 30], // starting position (lng, lat),
+            zoom: 3
+        }
+    });
+
+    myScrollmap.controller.loaded = (map) => {
+        console.log(map);
     }
 });
 
-myScrollmap.controller.loaded = (map) => {
-    console.log(map);
-}
+
 
 
 </script>
