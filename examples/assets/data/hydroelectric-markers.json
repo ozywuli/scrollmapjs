@@ -1,0 +1,135 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "three-gorges"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          111.002987,
+          30.828936
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "itaipu"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -54.588909,
+          -25.407924
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "xiluodu"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.6495,
+          28.25985
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "guri"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -63,
+          7.764444
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "tucurui"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -49.646667,
+          -3.831667
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "grand-coulee"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -118.981667,
+          47.955833
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "xiangjiaba"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          104.3925,
+          28.646667
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "longtan"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          107.0475,
+          25.027222
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "sayano"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.370278,
+          52.825833
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "krasnoyarsk"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          92.293611,
+          55.934722
+        ]
+      }
+    }
+  ]
+}
