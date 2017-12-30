@@ -3795,11 +3795,17 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
      */
     var defaultOptions = {
         data: null,
+        debounceSpeed: 150,
         mapboxConfig: {
             container: 'scrollmap',
             style: 'mapbox://styles/aosika/cj8tmsx9cdk3m2rqmxbq8gr1b',
+            // starting position (lng, lat),
             center: [0, 0],
             zoom: 1
+        },
+        markerConfig: {
+            color: '#FFF',
+            fontSize: '1.6rem'
         }
 
         /**
@@ -3826,6 +3832,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
     Scrollmap.prototype = {
         map: null,
         activeId: null,
+        allowPan: true,
+        isSrolling: false,
 
         /**
          * Init
@@ -3849,6 +3857,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
             mapboxgl.accessToken = _config2.default.mapboxAccessToken;
             // Instantiate mapbox
             map = new mapboxgl.Map(this.options.mapboxConfig);
+            map.scrollZoom.disable();
+            map.addControl(new mapboxgl.NavigationControl(), 'top-left');
 
             this.map = map;
 
@@ -3886,8 +3896,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
          * Handles the scroll event
          */
         scrollHandler: function scrollHandler() {
-            var _this3 = this;
-
             for (var i = 0; i < this.options.geojson.features.length; i++) {
                 var paneEl = document.querySelectorAll('.scrollmap-pane')[i];
                 if (this.isElementOnScreen(paneEl)) {
@@ -3896,8 +3904,33 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
                 }
             }
 
+            this.highlightActiveMarker(this.activeId);
+        },
+
+
+        /**
+         * Highlight active marker
+         */
+        highlightActiveMarker: function highlightActiveMarker(activeId) {
+            var _this3 = this;
+
+            var markerImgEl = document.querySelectorAll('.marker-img');
+
+            for (var i = 0; i < document.querySelectorAll('.marker-img').length; i++) {
+                markerImgEl[i].style.opacity = 0.5;
+                markerImgEl[i].style.backgroundImage = 'url("/images/map-marker.png")';
+                document.querySelectorAll('.marker')[i].style.zIndex = 10 - i;
+            }
+            $('.marker[data-id=' + activeId + ']').css({
+                'z-index': 1000
+            });
+            $('.marker[data-id=' + activeId + ']').find('.marker-img').css({
+                'opacity': 1,
+                'background-image': 'url("/images/map-marker-active.png")'
+            });
+
             (0, _find3.default)(this.options.geojson.features, function (item) {
-                if (item.properties.id === _this3.activeId) {
+                if (item.properties.id === activeId) {
                     _this3.panHandler(item.geometry.coordinates);
                 }
             });
@@ -3908,7 +3941,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
          * Add scroll event listener
          */
         addScrollListener: function addScrollListener() {
-            window.addEventListener('scroll', (0, _debounce3.default)(this.scrollHandler.bind(this), 150), true);
+            window.addEventListener('scroll', (0, _debounce3.default)(this.scrollHandler.bind(this), this.options.debounceSpeed), true);
         },
 
 
@@ -3933,6 +3966,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
          * Generate a map marker
          */
         generateMarker: function generateMarker(marker, index) {
+            var _this4 = this;
+
             // Make marker element
             var markerEl = document.createElement('div');
             markerEl.className = 'marker';
@@ -3951,15 +3986,15 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
             // Make marker number
             var markerElNumberEl = markerEl.appendChild(document.createElement('div'));
             markerElNumberEl.style.position = 'relative';
-            markerElNumberEl.style.top = '-0.4rem';
-            markerElNumberEl.style.color = '#FFF';
+            markerElNumberEl.style.top = '-' + parseFloat(this.options.markerConfig.fontSize) / 4 + 'rem';
+            markerElNumberEl.style.color = this.options.markerConfig.color;
             markerElNumberEl.style.display = 'flex';
             markerElNumberEl.style.alignItems = 'center';
             markerElNumberEl.style.justifyContent = 'center';
             markerElNumberEl.style.width = '100%';
             markerElNumberEl.style.height = '100%';
             markerElNumberEl.style.zIndex = '1';
-            markerElNumberEl.style.fontSize = '1.6rem';
+            markerElNumberEl.style.fontSize = this.options.markerConfig.fontSize;
             var markerElNumberText = document.createTextNode(index + 1);
 
             markerElNumberEl.appendChild(markerElNumberText);
@@ -3971,7 +4006,12 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
             // Add marker click event listener
             markerEl.addEventListener('click', function (event) {
-                console.log(event.currentTarget.dataset.id);
+                var thisMarkerId = event.currentTarget.dataset.id;
+                _this4.highlightActiveMarker(thisMarkerId);
+                var offset = $('.scrollmap-pane[data-id=' + thisMarkerId + ']')[0].offsetTop;
+                $('html, body').animate({
+                    scrollTop: offset
+                });
             });
         }
     }; // Scrollmap.prototype

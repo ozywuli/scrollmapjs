@@ -34,7 +34,7 @@ body {
     left: 0;
 }
 
-.scrollmap-panes {
+.scrollmap-content {
     position: absolute;
     top: 0;
     right: 0;
@@ -44,6 +44,10 @@ body {
     width: 450px;
     min-height: 100%;
     padding: 18px;
+}
+
+.scrollmap-panes {
+
 }
 
 .scrollmap-pane {
@@ -60,7 +64,35 @@ body {
 
 .marker-img {
     background-image: url('/images/map-marker.png');
-    background-size: contain;
+    background-size: cover;
     opacity: 0.5;
 }
 
+
+
+/*------------------------------------*\
+  Recommended
+\*------------------------------------*/
+.scrollmap-recommended__list-item {
+    margin-bottom: 24px;
+
+    &:last-of-type {
+        margin-bottom: 0;
+    }
+}
+
+.scrollmap-recommended__list-anchor {
+    display: block;
+    position: relative;
+    padding-bottom: 56.25%;
+}
+
+.scrollmap-recommended__bg {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background-image: url('http://placehold.it/1600x900');
+    background-size: cover;
+}

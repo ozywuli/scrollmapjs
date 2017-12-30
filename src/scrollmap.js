@@ -27,11 +27,17 @@ import _find from 'lodash/find';
      */
     let defaultOptions = {
         data: null,
+        debounceSpeed: 150,
         mapboxConfig: {
             container: 'scrollmap',
             style: 'mapbox://styles/aosika/cj8tmsx9cdk3m2rqmxbq8gr1b',
+            // starting position (lng, lat),
             center: [0, 0],
             zoom: 1
+        },
+        markerConfig: {
+            color: '#FFF',
+            fontSize: '1.6rem'
         }
     }
 
@@ -61,6 +67,8 @@ import _find from 'lodash/find';
     Scrollmap.prototype = {
         map: null,
         activeId: null,
+        allowPan: true,
+        isSrolling: false,
 
         /**
          * Init
@@ -81,6 +89,8 @@ import _find from 'lodash/find';
             mapboxgl.accessToken = config.mapboxAccessToken;
             // Instantiate mapbox
             map = new mapboxgl.Map(this.options.mapboxConfig);
+                map.scrollZoom.disable();
+                map.addControl(new mapboxgl.NavigationControl(), 'top-left');
 
             this.map = map;
 
@@ -122,19 +132,41 @@ import _find from 'lodash/find';
                 }
             }
 
+            this.highlightActiveMarker(this.activeId);
+        },
+
+
+        /**
+         * Highlight active marker
+         */
+        highlightActiveMarker(activeId) {
+            let markerImgEl = document.querySelectorAll('.marker-img');
+
+            for (let i = 0; i < document.querySelectorAll('.marker-img').length; i++) {
+                markerImgEl[i].style.opacity = 0.5;
+                markerImgEl[i].style.backgroundImage = 'url("/images/map-marker.png")';
+                document.querySelectorAll('.marker')[i].style.zIndex = 10 - i;
+            }
+            $(`.marker[data-id=${activeId}]`).css({
+                'z-index': 1000
+            });
+            $(`.marker[data-id=${activeId}]`).find('.marker-img').css({
+                'opacity': 1,
+                'background-image': 'url("/images/map-marker-active.png")',
+            });
+
             _find(this.options.geojson.features, (item) => {
-                if (item.properties.id === this.activeId) {
+                if (item.properties.id === activeId) {
                     this.panHandler(item.geometry.coordinates);
                 }
             });
-
         },
 
         /**
          * Add scroll event listener
          */
         addScrollListener() {
-            window.addEventListener('scroll', _debounce(this.scrollHandler.bind(this), 150), true);
+            window.addEventListener('scroll', _debounce(this.scrollHandler.bind(this), this.options.debounceSpeed), true);
         },
 
 
@@ -171,19 +203,20 @@ import _find from 'lodash/find';
             markerBgEl.style.position = 'absolute';
             markerBgEl.style.width = '100%';
             markerBgEl.style.height = '100%';
+
             
             // Make marker number
             let markerElNumberEl = markerEl.appendChild(document.createElement('div'));
             markerElNumberEl.style.position = 'relative';
-            markerElNumberEl.style.top = '-0.4rem';
-            markerElNumberEl.style.color = '#FFF';
+            markerElNumberEl.style.top = `-${parseFloat(this.options.markerConfig.fontSize) / 4}rem`;
+            markerElNumberEl.style.color = this.options.markerConfig.color;
             markerElNumberEl.style.display = 'flex';
             markerElNumberEl.style.alignItems = 'center';
             markerElNumberEl.style.justifyContent = 'center';
             markerElNumberEl.style.width = '100%';
             markerElNumberEl.style.height = '100%';
             markerElNumberEl.style.zIndex = '1';
-            markerElNumberEl.style.fontSize = '1.6rem';
+            markerElNumberEl.style.fontSize = this.options.markerConfig.fontSize;
             let markerElNumberText = document.createTextNode(index + 1);
 
             markerElNumberEl.appendChild(markerElNumberText);
@@ -197,7 +230,12 @@ import _find from 'lodash/find';
 
             // Add marker click event listener
             markerEl.addEventListener('click', (event) => {
-                console.log(event.currentTarget.dataset.id);
+                let thisMarkerId = event.currentTarget.dataset.id;
+                this.highlightActiveMarker(thisMarkerId);
+                let offset = $(`.scrollmap-pane[data-id=${thisMarkerId}]`)[0].offsetTop;
+                $('html, body').animate({
+                    scrollTop: offset
+                });
             });
         }
 
