@@ -37,7 +37,11 @@ import _find from 'lodash/find';
         },
         markerConfig: {
             color: '#FFF',
-            fontSize: '1.6rem'
+            fontSize: '1.6rem',
+            dimensions: {
+                width: '45px',
+                height: '60px'
+            }
         }
     }
 
@@ -67,6 +71,7 @@ import _find from 'lodash/find';
     Scrollmap.prototype = {
         map: null,
         activeId: null,
+        currentActiveId: null,
         allowPan: true,
         isSrolling: false,
 
@@ -75,7 +80,7 @@ import _find from 'lodash/find';
          */
         init() {
             this.instantiateMap();
-            this.addScrollListener();
+            // this.addScrollListener();
             console.log(this.options.geojson.features);
         },
 
@@ -118,6 +123,9 @@ import _find from 'lodash/find';
          */
         afterMapLoad(map) {
             this.controller.afterMapInstantiation(map);
+            // trigger scroll after map finishes loading
+            this.scrollHandler();
+            this.addScrollListener();
         },
 
         /**
@@ -132,7 +140,7 @@ import _find from 'lodash/find';
                 }
             }
 
-            this.highlightActiveMarker(this.activeId);
+            this.highlightActiveMarker(this.activeId);    
         },
 
 
@@ -140,32 +148,42 @@ import _find from 'lodash/find';
          * Highlight active marker
          */
         highlightActiveMarker(activeId) {
-            let markerImgEl = document.querySelectorAll('.marker-img');
+            // if marker is already highlighted, don't highlight it again
+            if (this.currentActiveId !== activeId) {
+                console.log('highlight');
+                let markerImgEl = document.querySelectorAll('.marker-img');
+                let markerEl = document.querySelectorAll('.marker');
 
-            for (let i = 0; i < document.querySelectorAll('.marker-img').length; i++) {
-                markerImgEl[i].style.opacity = 0.5;
-                markerImgEl[i].style.backgroundImage = 'url("/images/map-marker.png")';
-                document.querySelectorAll('.marker')[i].style.zIndex = 10 - i;
-            }
-            $(`.marker[data-id=${activeId}]`).css({
-                'z-index': 1000
-            });
-            $(`.marker[data-id=${activeId}]`).find('.marker-img').css({
-                'opacity': 1,
-                'background-image': 'url("/images/map-marker-active.png")',
-            });
-
-            _find(this.options.geojson.features, (item) => {
-                if (item.properties.id === activeId) {
-                    this.panHandler(item.geometry.coordinates);
+                for (let i = 0; i < markerImgEl.length; i++) {
+                    markerImgEl[i].style.opacity = 0.5;
+                    markerImgEl[i].style.backgroundImage = 'url("/images/map-marker.png")';
+                    markerEl[i].style.zIndex = 10 - i;
                 }
-            });
+
+                $(`.marker[data-id=${activeId}]`).css({
+                    'z-index': 1000
+                });
+                $(`.marker[data-id=${activeId}]`).find('.marker-img').css({
+                    'opacity': 1,
+                    'background-image': 'url("/images/map-marker-active.png")',
+                });
+
+                _find(this.options.geojson.features, (item) => {
+                    if (item.properties.id === activeId) {
+                        this.panHandler(item.geometry.coordinates);
+                    }
+                });
+            }
+
+            // keep track of the activeId so that users don't fire `highlightActiveMarker` if a marker is already highlighted
+            this.currentActiveId = activeId;
         },
 
         /**
          * Add scroll event listener
          */
         addScrollListener() {
+            console.log('add scroll listener');
             window.addEventListener('scroll', _debounce(this.scrollHandler.bind(this), this.options.debounceSpeed), true);
         },
 
@@ -189,11 +207,12 @@ import _find from 'lodash/find';
          * Generate a map marker
          */
         generateMarker(marker, index) {
+            console.log('generate marker');
             // Make marker element
             let markerEl = document.createElement('div');
             markerEl.className = 'marker';
-            markerEl.style.width = '45px';
-            markerEl.style.height = '60px';
+            markerEl.style.width = this.options.markerConfig.dimensions.width;
+            markerEl.style.height = this.options.markerConfig.dimensions.height;
             markerEl.style.zIndex = 10 - index;
             markerEl.dataset.id = marker.properties.id;
 
@@ -223,7 +242,7 @@ import _find from 'lodash/find';
 
             // Marker config
             let markerInstance = new mapboxgl.Marker(markerEl, {
-                offset: [-22.5 / 2, -30 / 2]
+                offset: [-parseInt(this.options.markerConfig.dimensions.width) / 10, -parseInt(this.options.markerConfig.dimensions.height) / 2]
             })
                 .setLngLat(marker.geometry.coordinates)
                 .addTo(this.map);
@@ -231,7 +250,10 @@ import _find from 'lodash/find';
             // Add marker click event listener
             markerEl.addEventListener('click', (event) => {
                 let thisMarkerId = event.currentTarget.dataset.id;
-                this.highlightActiveMarker(thisMarkerId);
+
+                this.activeId = thisMarkerId;
+                this.highlightActiveMarker(this.activeId);    
+
                 let offset = $(`.scrollmap-pane[data-id=${thisMarkerId}]`)[0].offsetTop;
                 $('html, body').animate({
                     scrollTop: offset

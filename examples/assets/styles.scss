@@ -47,7 +47,7 @@ body {
 }
 
 .scrollmap-panes {
-
+    margin-bottom: 4.8rem;
 }
 
 .scrollmap-pane {
@@ -95,4 +95,14 @@ body {
     left: 0;
     background-image: url('http://placehold.it/1600x900');
     background-size: cover;
+}
+
+.scrollmap-recommended__meta {
+    position: relative;
+    z-index: 1;
+}
+
+.scrollmap-recommended__title {
+    font-size: 2.4rem;
+    margin-bottom: 1.2rem;
 }
