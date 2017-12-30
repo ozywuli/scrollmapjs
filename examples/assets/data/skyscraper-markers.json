@@ -95,20 +95,7 @@
     {
       "type": "Feature",
       "properties": {
-        "id": "tianjin-ctf"
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-            117.698082,
-            39.021818
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "id": "taopei-101"
+        "id": "taipei-101"
       },
       "geometry": {
         "type": "Point",
@@ -128,6 +115,19 @@
         "coordinates": [
             121.507417,
             31.235114
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "icc"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+            114.160169,
+            22.303392
         ]
       }
     }

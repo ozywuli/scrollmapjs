@@ -13,6 +13,13 @@ html, body {
     line-height: 1.2;
 }
 
+html {
+    font-size: 62.5%;
+}
+
+body {
+}
+
 .scrollmap-container {
     position: relative;
     width: 100%;
@@ -48,11 +55,12 @@ html, body {
 }
 
 .marker {
-    background-color: red;
-    background-size: cover;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
     cursor: pointer;
+}
+
+.marker-img {
+    background-image: url('/images/map-marker.png');
+    background-size: contain;
+    opacity: 0.5;
 }
 

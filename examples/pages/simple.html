@@ -11,7 +11,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 
     <!-- vendor styles -->
-    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.21.0/mapbox-gl.css' rel='stylesheet' />
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.43.0/mapbox-gl.css' rel='stylesheet' />
+
 
     <!-- styles -->
     <link rel="stylesheet" type="text/css" href="styles.css"/>
@@ -25,60 +26,14 @@
     <!-- Panes -->
     <div class="scrollmap-panes">    
         <!-- Pane -->
-        <section 
-            class="scrollmap-pane"
-            data-id="burj-khalife"
-        >
-            <div class="scrollmap-pane__container">
-                <header class="scrollmap-pane__head">
-                    <h2 class="scrollmap-pane__title">
-                        Burj Khalifa
-                    </h2>
-                    <h3 class="scrollmap-pane__subtitle">
-                        The Tallest Building In The World
-                    </h3>
-                </header>
-                <figure class="scrollmap-pane__fig">
-                    <div class="scrollmap-pane__fig-container">
-                        <div class="scrollmap-pane__fig-frame">
-                            <img src="http://placehold.it/400x225" alt="image" class="scrollmap-pane__fig-img">
-                        </div>
-                        <figcaption class="scrollmap-pane__caption">
-                            Image caption
-                        </figcaption>
-                    </div>
-                </figure>
-                <div class="scrollmap-pane__content">
-                    <p class="scrollmap-pane__description">
-                        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Eveniet tenetur dignissimos optio consequatur hic eius placeat odit est sed, veniam illum, voluptas ad a? Molestiae, ipsam reprehenderit. Tempore explicabo, reprehenderit.
-                    </p>
-                    <div class="scrollmap-pane__btns">
-                        <a 
-                            href="#" 
-                            class="scrollmap-pane__btn"
-                            target="_blank"
-                        >
-                            wiki info
-                        </a>
-                        <a 
-                            href="#" 
-                            class="scrollmap-pane__btn"
-                            target="_blank"
-                        >
-                            500px images
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </section>
+
     </div>
 </div>
 
 
 <!-- vendor scripts -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
-<script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.21.0/mapbox-gl.js'></script>
-
+<script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.43.0/mapbox-gl.js'></script>
 
 <!-- scripts -->
 <script src="./scrollmap.js"></script>
@@ -87,7 +42,7 @@
 
 // ajax request for region locations
 let getRegionLocations = new Promise((resolve, reject) => {
-    $.getJSON('/data/hydroelectric-markers.json', (data) => {
+    $.getJSON('/data/skyscraper-markers.json', (data) => {
         resolve(data)
     });
 })
@@ -95,9 +50,57 @@ let getRegionLocations = new Promise((resolve, reject) => {
 // ajax request for region info
 let getRegionInfo = new Promise((resolve, reject) => {
     $.getJSON('/data/skyscraper-info.json', (data) => {
-        Object.keys(data).forEach((key) => {
-            console.log(key);
-        })
+        for (let i = 0; i < data.features.length; i++) {
+            $('.scrollmap-panes').append(`
+                <section 
+                    class="scrollmap-pane"
+                    data-id="${data.features[i].id}"
+                >
+                    <div class="scrollmap-pane__container">
+                        <header class="scrollmap-pane__head">
+                            <h2 class="scrollmap-pane__title">
+                                ${data.features[i].title}
+                            </h2>
+                            <h3 class="scrollmap-pane__subtitle">
+                                ${data.features[i].subtitle}
+                            </h3>
+                        </header>
+                        <figure class="scrollmap-pane__fig">
+                            <div class="scrollmap-pane__fig-container">
+                                <div class="scrollmap-pane__fig-frame">
+                                    <img src="http://placehold.it/400x225" alt="image" class="scrollmap-pane__fig-img">
+                                </div>
+                                <figcaption class="scrollmap-pane__caption">
+                                    Image caption
+                                </figcaption>
+                            </div>
+                        </figure>
+                        <div class="scrollmap-pane__content">
+                            <p class="scrollmap-pane__description">
+                                ${data.features[i].description}
+                            </p>
+                            <div class="scrollmap-pane__btns">
+                                <a 
+                                    href="${data.features[i].wikiUrl}" 
+                                    class="scrollmap-pane__btn"
+                                    target="_blank"
+                                >
+                                    wiki info
+                                </a>
+                                <a 
+                                    href="${data.features[i].moreImagesUrl}" 
+                                    class="scrollmap-pane__btn"
+                                    target="_blank"
+                                >
+                                    more images
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            `);
+
+        }
         resolve(data)
     });
 })
@@ -127,7 +130,7 @@ Promise.all(regionPromises)
         });
 
         myScrollmap.controller.loaded = (map) => {
-            console.log(map);
+            // console.log(map);
         }
     })
 

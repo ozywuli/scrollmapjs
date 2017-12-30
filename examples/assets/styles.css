@@ -57,6 +57,9 @@ html, body {
   font-family: Arial, sans-serif;
   line-height: 1.2; }
 
+html {
+  font-size: 62.5%; }
+
 .scrollmap-container {
   position: relative;
   width: 100%;
@@ -87,9 +90,9 @@ html, body {
   margin-bottom: 8px; }
 
 .marker {
-  background-color: red;
-  background-size: cover;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
   cursor: pointer; }
+
+.marker-img {
+  background-image: url("/images/map-marker.png");
+  background-size: contain;
+  opacity: 0.5; }
