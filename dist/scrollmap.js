@@ -3839,13 +3839,19 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
         currentActiveId: null,
         allowPan: true,
         isSrolling: false,
+        isMobile: true,
+        mapOffset: null,
+        isToggled: false,
 
         /**
          * Init
          */
         init: function init() {
+            this.checkScreenSize();
+            this.initWindowResizeEvent();
+            this.getMapHeight();
             this.instantiateMap();
-            // this.addScrollListener();
+            this.initToggleEvent();
             console.log(this.options.geojson.features);
         },
 
@@ -3897,6 +3903,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
             // trigger scroll after map finishes loading
             this.scrollHandler();
             this.addScrollListener();
+            this.initMarkerClickEvent();
         },
 
 
@@ -3917,14 +3924,50 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 
         /**
+         * Check device screen size
+         */
+        checkScreenSize: function checkScreenSize() {
+            if (window.innerWidth > 760) {
+                this.isMobile = false;
+            } else {
+                this.isMobile = true;
+            }
+        },
+
+
+        /**
+         * 
+         */
+        initWindowResizeEvent: function initWindowResizeEvent() {
+            var _this3 = this;
+
+            $(window).on('resize', function () {
+                _this3.checkScreenSize();
+            });
+        },
+
+
+        /**
+         * 
+         */
+        getMapHeight: function getMapHeight() {
+            var scrollmapEl = document.querySelector('.scrollmap-map');
+            var scrollmapElStyle = window.getComputedStyle(scrollmapEl);
+            var height = scrollmapElStyle.getPropertyValue('height');
+
+            this.mapOffset = parseInt(height);
+        },
+
+
+        /**
          * Highlight active marker
          */
         highlightActiveMarker: function highlightActiveMarker(activeId) {
-            var _this3 = this;
+            var _this4 = this;
 
             // if marker is already highlighted, don't highlight it again
             if (this.currentActiveId !== activeId) {
-                console.log('highlight');
+                // console.log('highlight');
                 var markerImgEl = document.querySelectorAll('.marker-img');
                 var markerEl = document.querySelectorAll('.marker');
 
@@ -3944,7 +3987,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
                 (0, _find3.default)(this.options.geojson.features, function (item) {
                     if (item.properties.id === activeId) {
-                        _this3.panHandler(item.geometry.coordinates);
+                        _this4.panHandler(item.geometry.coordinates);
                     }
                 });
             }
@@ -3976,7 +4019,15 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
          */
         isElementOnScreen: function isElementOnScreen(paneEl) {
             var bounds = paneEl.getBoundingClientRect();
-            return bounds.top < window.innerHeight && bounds.bottom > 0;
+            var elPos = void 0;
+
+            if (this.isMobile) {
+                elPos = bounds.top < window.innerHeight - this.mapOffset && bounds.bottom - this.mapOffset > 0;
+            } else {
+                elPos = bounds.top < window.innerHeight && bounds.bottom > 0;
+            }
+
+            return elPos;
         },
 
 
@@ -3984,9 +4035,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
          * Generate a map marker
          */
         generateMarker: function generateMarker(marker, index) {
-            var _this4 = this;
-
-            console.log('generate marker');
+            // console.log('generate marker');
             // Make marker element
             var markerEl = document.createElement('div');
             markerEl.className = 'marker';
@@ -4001,6 +4050,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
             markerBgEl.style.position = 'absolute';
             markerBgEl.style.width = '100%';
             markerBgEl.style.height = '100%';
+            markerBgEl.dataset.id = marker.properties.id;
 
             // Make marker number
             var markerElNumberEl = markerEl.appendChild(document.createElement('div'));
@@ -4014,6 +4064,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
             markerElNumberEl.style.height = '100%';
             markerElNumberEl.style.zIndex = '1';
             markerElNumberEl.style.fontSize = this.options.markerConfig.fontSize;
+            markerElNumberEl.dataset.id = marker.properties.id;
             var markerElNumberText = document.createTextNode(index + 1);
 
             markerElNumberEl.appendChild(markerElNumberText);
@@ -4022,19 +4073,72 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
             var markerInstance = new mapboxgl.Marker(markerEl, {
                 offset: [-parseInt(this.options.markerConfig.dimensions.width) / 10, -parseInt(this.options.markerConfig.dimensions.height) / 2]
             }).setLngLat(marker.geometry.coordinates).addTo(this.map);
+        },
 
-            // Add marker click event listener
-            markerEl.addEventListener('click', function (event) {
-                var thisMarkerId = event.currentTarget.dataset.id;
 
-                _this4.activeId = thisMarkerId;
-                _this4.highlightActiveMarker(_this4.activeId);
+        /**
+         * 
+         */
+        initMarkerClickEvent: function initMarkerClickEvent() {
+            var _this5 = this;
 
-                var offset = $('.scrollmap-pane[data-id=' + thisMarkerId + ']')[0].offsetTop;
-                $('html, body').animate({
-                    scrollTop: offset
-                });
+            $(document).on('click', '.marker', function (event) {
+                if (_this5.isToggled) {
+                    _this5.toggleMap();
+                    window.setTimeout(function () {
+                        _this5.scrollMap(event);
+                    }, 200);
+                } else {
+                    _this5.scrollMap(event);
+                }
             });
+        },
+
+
+        /**
+         * 
+         */
+        scrollMap: function scrollMap(event) {
+            console.log(event.currentTarget);
+            var thisMarkerId = event.currentTarget.dataset.id;
+
+            this.activeId = thisMarkerId;
+            this.highlightActiveMarker(this.activeId);
+
+            var offset = $('.scrollmap-pane[data-id=' + thisMarkerId + ']')[0].offsetTop;
+            $('html, body').animate({
+                scrollTop: offset
+            });
+        },
+
+
+        /**
+         * 
+         */
+        initToggleEvent: function initToggleEvent() {
+            $('.scrollmap__toggle-map').on('click', this.toggleMap.bind(this));
+        },
+
+
+        /**
+         * 
+         */
+        toggleMap: function toggleMap() {
+            if (!this.isToggled) {
+                $('.scrollmap-map').css('height', '100%');
+                $('.scrollmap-content').css('display', 'none');
+                $('.scrollmap-controls').css({
+                    'position': 'fixed',
+                    'top': 'auto',
+                    'bottom': 0
+                });
+                this.isToggled = true;
+            } else {
+                $('.scrollmap-map, .scrollmap-content, .scrollmap-controls').removeAttr('style');
+                this.isToggled = false;
+            }
+
+            this.map.resize();
         }
     }; // Scrollmap.prototype
 

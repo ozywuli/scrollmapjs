@@ -74,14 +74,21 @@ import _find from 'lodash/find';
         currentActiveId: null,
         allowPan: true,
         isSrolling: false,
+        isMobile: true,
+        mapOffset: null,
+        isToggled: false,
 
         /**
          * Init
          */
         init() {
+            this.checkScreenSize();
+            this.initWindowResizeEvent();
+            this.getMapHeight();
             this.instantiateMap();
-            // this.addScrollListener();
+            this.initToggleEvent();
             console.log(this.options.geojson.features);
+
         },
 
         /**
@@ -126,6 +133,7 @@ import _find from 'lodash/find';
             // trigger scroll after map finishes loading
             this.scrollHandler();
             this.addScrollListener();
+            this.initMarkerClickEvent();
         },
 
         /**
@@ -145,12 +153,44 @@ import _find from 'lodash/find';
 
 
         /**
+         * Check device screen size
+         */
+        checkScreenSize() {
+            if (window.innerWidth > 760) {
+                this.isMobile = false;
+            } else {
+                this.isMobile = true;
+            }
+        },
+
+
+        /**
+         * 
+         */
+        initWindowResizeEvent() {
+            $(window).on('resize', () => {
+                this.checkScreenSize();
+            });
+        },
+
+        /**
+         * 
+         */
+        getMapHeight() {
+            let scrollmapEl = document.querySelector('.scrollmap-map');
+            let scrollmapElStyle = window.getComputedStyle(scrollmapEl);
+            let height = scrollmapElStyle.getPropertyValue('height');
+            
+            this.mapOffset = parseInt(height);
+        },
+
+        /**
          * Highlight active marker
          */
         highlightActiveMarker(activeId) {
             // if marker is already highlighted, don't highlight it again
             if (this.currentActiveId !== activeId) {
-                console.log('highlight');
+                // console.log('highlight');
                 let markerImgEl = document.querySelectorAll('.marker-img');
                 let markerEl = document.querySelectorAll('.marker');
 
@@ -200,14 +240,22 @@ import _find from 'lodash/find';
          */
         isElementOnScreen(paneEl) {
             let bounds = paneEl.getBoundingClientRect();
-            return bounds.top < window.innerHeight && bounds.bottom > 0;
+            let elPos;
+
+            if (this.isMobile) {
+                elPos = bounds.top < (window.innerHeight - this.mapOffset) && (bounds.bottom - this.mapOffset) > 0;
+            } else {
+                elPos = bounds.top < window.innerHeight && bounds.bottom > 0;
+            }
+
+            return elPos;
         },
 
         /**
          * Generate a map marker
          */
         generateMarker(marker, index) {
-            console.log('generate marker');
+            // console.log('generate marker');
             // Make marker element
             let markerEl = document.createElement('div');
             markerEl.className = 'marker';
@@ -222,6 +270,7 @@ import _find from 'lodash/find';
             markerBgEl.style.position = 'absolute';
             markerBgEl.style.width = '100%';
             markerBgEl.style.height = '100%';
+            markerBgEl.dataset.id = marker.properties.id;
 
             
             // Make marker number
@@ -236,6 +285,7 @@ import _find from 'lodash/find';
             markerElNumberEl.style.height = '100%';
             markerElNumberEl.style.zIndex = '1';
             markerElNumberEl.style.fontSize = this.options.markerConfig.fontSize;
+            markerElNumberEl.dataset.id = marker.properties.id;
             let markerElNumberText = document.createTextNode(index + 1);
 
             markerElNumberEl.appendChild(markerElNumberText);
@@ -246,19 +296,67 @@ import _find from 'lodash/find';
             })
                 .setLngLat(marker.geometry.coordinates)
                 .addTo(this.map);
+        },
 
-            // Add marker click event listener
-            markerEl.addEventListener('click', (event) => {
-                let thisMarkerId = event.currentTarget.dataset.id;
+        /**
+         * 
+         */
+        initMarkerClickEvent() {
+            $(document).on('click', '.marker', (event) => {
+                if (this.isToggled) {
+                    this.toggleMap()
+                    window.setTimeout(() => {
+                        this.scrollMap(event);
+                    }, 200)
+                } else {
+                    this.scrollMap(event);
+                }
+            })
+        },
 
-                this.activeId = thisMarkerId;
-                this.highlightActiveMarker(this.activeId);    
+        /**
+         * 
+         */
+        scrollMap(event) {
+            console.log(event.currentTarget);
+            let thisMarkerId = event.currentTarget.dataset.id;
 
-                let offset = $(`.scrollmap-pane[data-id=${thisMarkerId}]`)[0].offsetTop;
-                $('html, body').animate({
-                    scrollTop: offset
-                });
+            this.activeId = thisMarkerId;
+            this.highlightActiveMarker(this.activeId);    
+
+            let offset = $(`.scrollmap-pane[data-id=${thisMarkerId}]`)[0].offsetTop;
+            $('html, body').animate({
+                scrollTop: offset
             });
+        },
+
+        /**
+         * 
+         */
+        initToggleEvent() {
+            $('.scrollmap__toggle-map').on('click', this.toggleMap.bind(this));
+        },
+
+        /**
+         * 
+         */
+        toggleMap() {
+            if (!this.isToggled) {
+                $('.scrollmap-map').css('height', '100%');
+                $('.scrollmap-content').css('display', 'none');
+                $('.scrollmap-controls').css({
+                    'position': 'fixed',
+                    'top': 'auto',
+                    'bottom': 0
+                });
+                this.isToggled = true;
+            } else {
+                $('.scrollmap-map, .scrollmap-content, .scrollmap-controls').removeAttr('style');
+                this.isToggled = false;
+            }
+
+            this.map.resize();
+   
         }
 
     } // Scrollmap.prototype
