@@ -152,8 +152,17 @@ html {
   right: 0;
   left: 0;
   z-index: 15; }
+  @media all and (min-width: 760px) {
+    .scrollmap-controls {
+      display: none; } }
 
 .scrollmap__toggle-map {
   display: block;
   text-align: center;
   padding: 10px 0; }
+
+.mapboxgl-control-container {
+  display: none; }
+  @media all and (min-width: 760px) {
+    .mapboxgl-control-container {
+      display: block; } }

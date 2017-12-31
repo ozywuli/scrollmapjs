@@ -87,7 +87,7 @@ import _find from 'lodash/find';
             this.getMapHeight();
             this.instantiateMap();
             this.initToggleEvent();
-            console.log(this.options.geojson.features);
+            // console.log(this.options.geojson.features);
 
         },
 
@@ -143,7 +143,11 @@ import _find from 'lodash/find';
             for (let i = 0; i < this.options.geojson.features.length; i++) {
                 let paneEl = document.querySelectorAll('.scrollmap-pane')[i];
                 if (this.isElementOnScreen(paneEl)) {
+                    console.log('el on screen');
                     this.activeId = paneEl.dataset.id;
+                    break;
+                } else if (window.scrollY === 0) {
+                    this.resetScrollmap();
                     break;
                 }
             }
@@ -151,6 +155,23 @@ import _find from 'lodash/find';
             this.highlightActiveMarker(this.activeId);    
         },
 
+        /**
+         * 
+         */
+        resetScrollmap() {
+            console.log('reset map');
+            let markerImgEl = document.querySelectorAll('.marker-img');
+            let markerEl = document.querySelectorAll('.marker');
+
+            for (let i = 0; i < markerImgEl.length; i++) {
+                markerImgEl[i].style.opacity = 0.5;
+                markerImgEl[i].style.backgroundImage = 'url("/images/map-marker.png")';
+                markerEl[i].style.zIndex = 10 - i;
+            }
+
+            this.map.panTo([100, 30]);
+            this.currentActiveId = this.activeId = null;
+        },
 
         /**
          * Check device screen size
@@ -170,6 +191,9 @@ import _find from 'lodash/find';
         initWindowResizeEvent() {
             $(window).on('resize', () => {
                 this.checkScreenSize();
+                if (this.isToggled) {
+                    this.toggleMap()
+                }
             });
         },
 
@@ -223,7 +247,7 @@ import _find from 'lodash/find';
          * Add scroll event listener
          */
         addScrollListener() {
-            console.log('add scroll listener');
+            // console.log('add scroll listener');
             window.addEventListener('scroll', _debounce(this.scrollHandler.bind(this), this.options.debounceSpeed), true);
         },
 
@@ -245,8 +269,10 @@ import _find from 'lodash/find';
             if (this.isMobile) {
                 elPos = bounds.top < (window.innerHeight - this.mapOffset) && (bounds.bottom - this.mapOffset) > 0;
             } else {
-                elPos = bounds.top < window.innerHeight && bounds.bottom > 0;
+                elPos = (window.scrollY > bounds.top - 24) && (bounds.top < window.innerHeight) && (bounds.bottom > 0);
             }
+
+            // console.log(elPos);
 
             return elPos;
         },
@@ -324,7 +350,7 @@ import _find from 'lodash/find';
             this.activeId = thisMarkerId;
             this.highlightActiveMarker(this.activeId);    
 
-            let offset = $(`.scrollmap-pane[data-id=${thisMarkerId}]`)[0].offsetTop;
+            let offset = $(`.scrollmap-pane[data-id=${thisMarkerId}]`)[0].offsetTop - 24;
             $('html, body').animate({
                 scrollTop: offset
             });

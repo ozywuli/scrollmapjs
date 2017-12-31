@@ -3852,7 +3852,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
             this.getMapHeight();
             this.instantiateMap();
             this.initToggleEvent();
-            console.log(this.options.geojson.features);
+            // console.log(this.options.geojson.features);
         },
 
 
@@ -3914,12 +3914,35 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
             for (var i = 0; i < this.options.geojson.features.length; i++) {
                 var paneEl = document.querySelectorAll('.scrollmap-pane')[i];
                 if (this.isElementOnScreen(paneEl)) {
+                    console.log('el on screen');
                     this.activeId = paneEl.dataset.id;
+                    break;
+                } else if (window.scrollY === 0) {
+                    this.resetScrollmap();
                     break;
                 }
             }
 
             this.highlightActiveMarker(this.activeId);
+        },
+
+
+        /**
+         * 
+         */
+        resetScrollmap: function resetScrollmap() {
+            console.log('reset map');
+            var markerImgEl = document.querySelectorAll('.marker-img');
+            var markerEl = document.querySelectorAll('.marker');
+
+            for (var i = 0; i < markerImgEl.length; i++) {
+                markerImgEl[i].style.opacity = 0.5;
+                markerImgEl[i].style.backgroundImage = 'url("/images/map-marker.png")';
+                markerEl[i].style.zIndex = 10 - i;
+            }
+
+            this.map.panTo([100, 30]);
+            this.currentActiveId = this.activeId = null;
         },
 
 
@@ -3943,6 +3966,9 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
             $(window).on('resize', function () {
                 _this3.checkScreenSize();
+                if (_this3.isToggled) {
+                    _this3.toggleMap();
+                }
             });
         },
 
@@ -4001,7 +4027,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
          * Add scroll event listener
          */
         addScrollListener: function addScrollListener() {
-            console.log('add scroll listener');
+            // console.log('add scroll listener');
             window.addEventListener('scroll', (0, _debounce3.default)(this.scrollHandler.bind(this), this.options.debounceSpeed), true);
         },
 
@@ -4024,8 +4050,10 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
             if (this.isMobile) {
                 elPos = bounds.top < window.innerHeight - this.mapOffset && bounds.bottom - this.mapOffset > 0;
             } else {
-                elPos = bounds.top < window.innerHeight && bounds.bottom > 0;
+                elPos = window.scrollY > bounds.top - 24 && bounds.top < window.innerHeight && bounds.bottom > 0;
             }
+
+            // console.log(elPos);
 
             return elPos;
         },
@@ -4105,7 +4133,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
             this.activeId = thisMarkerId;
             this.highlightActiveMarker(this.activeId);
 
-            var offset = $('.scrollmap-pane[data-id=' + thisMarkerId + ']')[0].offsetTop;
+            var offset = $('.scrollmap-pane[data-id=' + thisMarkerId + ']')[0].offsetTop - 24;
             $('html, body').animate({
                 scrollTop: offset
             });
