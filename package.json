@@ -1,9 +1,9 @@
 {
-  "name": "scrollmap-js",
+  "name": "scrollmapjs",
   "description": "Scrollable map",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "license": "MIT",
-  "main": "dist/parallax.js",
+  "main": "dist/scrollmap.js",
   "homepage": "https://github.com/ozywuli/scrollmapjs",
   "author": "Ozy Wu-Li <ozy.wu.li@gmail.com>",
   "directories": {

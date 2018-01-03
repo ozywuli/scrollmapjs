@@ -77,6 +77,7 @@ html {
   @media all and (min-width: 760px) {
     .scrollmap-map {
       bottom: 0;
+      width: calc(100% - 450px);
       height: 100%;
       z-index: 0; } }
 
@@ -111,7 +112,6 @@ html {
   cursor: pointer; }
 
 .marker-img {
-  background-image: url("/images/map-marker.png");
   background-size: cover;
   opacity: 0.5; }
 

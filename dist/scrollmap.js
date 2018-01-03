@@ -5,7 +5,9 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 var config = {
+
     mapboxAccessToken: 'pk.eyJ1IjoiYW9zaWthIiwiYSI6IjQzRGIxeEkifQ.7OvmyBbXwwt9Qxjlh9Qd3w'
+
 };
 
 exports.default = config;
@@ -3809,6 +3811,10 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
             dimensions: {
                 width: '45px',
                 height: '60px'
+            },
+            images: {
+                default: 'url("/images/map-marker.png")',
+                active: 'url("/images/map-marker-active.png")'
             }
         }
 
@@ -3853,6 +3859,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
             this.instantiateMap();
             this.initToggleEvent();
             // console.log(this.options.geojson.features);
+            // console.log('wtf');
+            // console.log(this.options.markerConfig.images);
         },
 
 
@@ -3914,7 +3922,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
             for (var i = 0; i < this.options.geojson.features.length; i++) {
                 var paneEl = document.querySelectorAll('.scrollmap-pane')[i];
                 if (this.isElementOnScreen(paneEl)) {
-                    console.log('el on screen');
                     this.activeId = paneEl.dataset.id;
                     break;
                 } else if (window.scrollY === 0) {
@@ -3931,13 +3938,12 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
          * 
          */
         resetScrollmap: function resetScrollmap() {
-            console.log('reset map');
             var markerImgEl = document.querySelectorAll('.marker-img');
             var markerEl = document.querySelectorAll('.marker');
 
             for (var i = 0; i < markerImgEl.length; i++) {
                 markerImgEl[i].style.opacity = 0.5;
-                markerImgEl[i].style.backgroundImage = 'url("/images/map-marker.png")';
+                markerImgEl[i].style.backgroundImage = this.options.markerConfig.images.default;
                 markerEl[i].style.zIndex = 10 - i;
             }
 
@@ -3999,7 +4005,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
                 for (var i = 0; i < markerImgEl.length; i++) {
                     markerImgEl[i].style.opacity = 0.5;
-                    markerImgEl[i].style.backgroundImage = 'url("/images/map-marker.png")';
+                    markerImgEl[i].style.backgroundImage = this.options.markerConfig.images.default;
                     markerEl[i].style.zIndex = 10 - i;
                 }
 
@@ -4008,7 +4014,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
                 });
                 $('.marker[data-id=' + activeId + ']').find('.marker-img').css({
                     'opacity': 1,
-                    'background-image': 'url("/images/map-marker-active.png")'
+                    'background-image': this.options.markerConfig.images.active
                 });
 
                 (0, _find3.default)(this.options.geojson.features, function (item) {
@@ -4127,7 +4133,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
          * 
          */
         scrollMap: function scrollMap(event) {
-            console.log(event.currentTarget);
+            // console.log(event.currentTarget);
             var thisMarkerId = event.currentTarget.dataset.id;
 
             this.activeId = thisMarkerId;

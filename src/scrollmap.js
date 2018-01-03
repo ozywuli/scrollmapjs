@@ -41,6 +41,10 @@ import _find from 'lodash/find';
             dimensions: {
                 width: '45px',
                 height: '60px'
+            },
+            images: {
+                default: 'url("/images/map-marker.png")',
+                active: 'url("/images/map-marker-active.png")'
             }
         }
     }
@@ -88,7 +92,8 @@ import _find from 'lodash/find';
             this.instantiateMap();
             this.initToggleEvent();
             // console.log(this.options.geojson.features);
-
+            // console.log('wtf');
+            // console.log(this.options.markerConfig.images);
         },
 
         /**
@@ -143,7 +148,6 @@ import _find from 'lodash/find';
             for (let i = 0; i < this.options.geojson.features.length; i++) {
                 let paneEl = document.querySelectorAll('.scrollmap-pane')[i];
                 if (this.isElementOnScreen(paneEl)) {
-                    console.log('el on screen');
                     this.activeId = paneEl.dataset.id;
                     break;
                 } else if (window.scrollY === 0) {
@@ -159,13 +163,12 @@ import _find from 'lodash/find';
          * 
          */
         resetScrollmap() {
-            console.log('reset map');
             let markerImgEl = document.querySelectorAll('.marker-img');
             let markerEl = document.querySelectorAll('.marker');
 
             for (let i = 0; i < markerImgEl.length; i++) {
                 markerImgEl[i].style.opacity = 0.5;
-                markerImgEl[i].style.backgroundImage = 'url("/images/map-marker.png")';
+                markerImgEl[i].style.backgroundImage = this.options.markerConfig.images.default;
                 markerEl[i].style.zIndex = 10 - i;
             }
 
@@ -220,7 +223,7 @@ import _find from 'lodash/find';
 
                 for (let i = 0; i < markerImgEl.length; i++) {
                     markerImgEl[i].style.opacity = 0.5;
-                    markerImgEl[i].style.backgroundImage = 'url("/images/map-marker.png")';
+                    markerImgEl[i].style.backgroundImage = this.options.markerConfig.images.default;
                     markerEl[i].style.zIndex = 10 - i;
                 }
 
@@ -229,7 +232,7 @@ import _find from 'lodash/find';
                 });
                 $(`.marker[data-id=${activeId}]`).find('.marker-img').css({
                     'opacity': 1,
-                    'background-image': 'url("/images/map-marker-active.png")',
+                    'background-image': this.options.markerConfig.images.active,
                 });
 
                 _find(this.options.geojson.features, (item) => {
@@ -344,7 +347,7 @@ import _find from 'lodash/find';
          * 
          */
         scrollMap(event) {
-            console.log(event.currentTarget);
+            // console.log(event.currentTarget);
             let thisMarkerId = event.currentTarget.dataset.id;
 
             this.activeId = thisMarkerId;
