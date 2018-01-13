@@ -35,6 +35,9 @@ import _find from 'lodash/find';
             center: [0, 0],
             zoom: 1
         },
+        mapConfig: {
+            offset: 0
+        },
         markerConfig: {
             color: '#FFF',
             fontSize: '1.6rem',
@@ -270,9 +273,12 @@ import _find from 'lodash/find';
             let elPos;
 
             if (this.isMobile) {
-                elPos = bounds.top < (window.innerHeight - this.mapOffset) && (bounds.bottom - this.mapOffset) > 0;
+                elPos = bounds.top < (window.innerHeight - this.mapOffset) && 
+                (bounds.bottom - this.mapOffset) > 0;
             } else {
-                elPos = (window.scrollY > bounds.top - 24) && (bounds.top < window.innerHeight) && (bounds.bottom > 0);
+                elPos = (window.scrollY > bounds.top) && 
+                    (bounds.top < window.innerHeight) && 
+                    (bounds.bottom - this.options.mapConfig.offset > 0);
             }
 
             // console.log(elPos);

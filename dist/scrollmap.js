@@ -3805,6 +3805,9 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
             center: [0, 0],
             zoom: 1
         },
+        mapConfig: {
+            offset: 0
+        },
         markerConfig: {
             color: '#FFF',
             fontSize: '1.6rem',
@@ -4056,7 +4059,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
             if (this.isMobile) {
                 elPos = bounds.top < window.innerHeight - this.mapOffset && bounds.bottom - this.mapOffset > 0;
             } else {
-                elPos = window.scrollY > bounds.top - 24 && bounds.top < window.innerHeight && bounds.bottom > 0;
+                elPos = window.scrollY > bounds.top && bounds.top < window.innerHeight && bounds.bottom - this.options.mapConfig.offset > 0;
             }
 
             // console.log(elPos);
