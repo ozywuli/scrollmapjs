@@ -273,8 +273,9 @@ import _find from 'lodash/find';
             let elPos;
 
             if (this.isMobile) {
-                elPos = bounds.top < (window.innerHeight - this.mapOffset) && 
-                (bounds.bottom - this.mapOffset) > 0;
+                elPos = (window.scrollY > bounds.top) && 
+                    (bounds.top < window.innerHeight) && 
+                    (bounds.bottom - this.options.mapConfig.offset - parseInt($('.scrollmap-content').css('margin-top')) > 0);
             } else {
                 elPos = (window.scrollY > bounds.top) && 
                     (bounds.top < window.innerHeight) && 

@@ -4057,7 +4057,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
             var elPos = void 0;
 
             if (this.isMobile) {
-                elPos = bounds.top < window.innerHeight - this.mapOffset && bounds.bottom - this.mapOffset > 0;
+                elPos = window.scrollY > bounds.top && bounds.top < window.innerHeight && bounds.bottom - this.options.mapConfig.offset - parseInt($('.scrollmap-content').css('margin-top')) > 0;
             } else {
                 elPos = window.scrollY > bounds.top && bounds.top < window.innerHeight && bounds.bottom - this.options.mapConfig.offset > 0;
             }
