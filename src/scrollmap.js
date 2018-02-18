@@ -51,8 +51,8 @@ import _find from 'lodash/find';
                 height: '60px'
             },
             images: {
-                default: 'url("/images/map-marker.png")',
-                active: 'url("/images/map-marker-active.png")'
+                default: '/images/map-marker.png',
+                active: '/images/map-marker-active.png'
             }
         }
     }
@@ -192,7 +192,7 @@ import _find from 'lodash/find';
 
             for (let i = 0; i < markerImgEl.length; i++) {
                 markerImgEl[i].style.opacity = 0.5;
-                markerImgEl[i].style.backgroundImage = this.options.markerConfig.images.default;
+                markerImgEl[i].style.backgroundImage = `url(${this.options.markerConfig.images.default})`;
                 markerEl[i].style.zIndex = 10 - i;
             }
 
@@ -248,16 +248,17 @@ import _find from 'lodash/find';
 
                 for (let i = 0; i < markerImgEl.length; i++) {
                     markerImgEl[i].style.opacity = 0.5;
-                    markerImgEl[i].style.backgroundImage = this.options.markerConfig.images.default;
+                    markerImgEl[i].style.backgroundImage = `url(${this.options.markerConfig.images.default})`;
                     markerEl[i].style.zIndex = 10 - i;
                 }
 
                 $(`.marker[data-id=${activeId}]`).css({
                     'z-index': 1000
                 });
+                
                 $(`.marker[data-id=${activeId}]`).find('.marker-img').css({
                     'opacity': 1,
-                    'background-image': this.options.markerConfig.images.active,
+                    'background-image': `url(${this.options.markerConfig.images.active})`,
                 });
 
                 _find(this.options.geojson.features, (item) => {
@@ -428,9 +429,6 @@ import _find from 'lodash/find';
       Export 
     \*------------------------------------*/
     module.exports = Scrollmap;
-
-
-
 
 })( jQuery, window , document );
 
