@@ -30,13 +30,18 @@ import _find from 'lodash/find';
         debounceSpeed: 150,
         mapboxConfig: {
             container: 'scrollmap',
-            style: 'mapbox://styles/aosika/cj8tmsx9cdk3m2rqmxbq8gr1b',
-            // starting position (lng, lat),
-            center: [0, 0],
-            zoom: 1
+            style: 'mapbox://styles/aosika/cj8tmsx9cdk3m2rqmxbq8gr1b'
         },
         mapConfig: {
-            offset: 0
+            offset: 0,
+            center: {
+                mobile: [0, 0],
+                desktop: [0, 0]
+            },
+            zoom: {
+                mobile: 1,
+                desktop: 1
+            }
         },
         markerConfig: {
             color: '#FFF',
@@ -59,7 +64,10 @@ import _find from 'lodash/find';
     let Scrollmap = function( userOptions ) {
         // Combine/merge default and user options
         this.options = $.extend( true, defaultOptions, userOptions );
-        // Init
+
+        /**
+         * Init
+         */
         this.init();
         /**
          * Controller
@@ -91,12 +99,23 @@ import _find from 'lodash/find';
         init() {
             this.checkScreenSize();
             this.initWindowResizeEvent();
+            this.assignDynaMap();
             this.getMapHeight();
             this.instantiateMap();
             this.initToggleEvent();
-            // console.log(this.options.geojson.features);
-            // console.log('wtf');
-            // console.log(this.options.markerConfig.images);
+        },
+
+        /**
+         * Assign initial center position
+         */
+        assignDynaMap() {
+            if (this.isMobile) {
+                this.options.mapboxConfig.center = this.options.mapConfig.center.mobile;
+                this.options.mapboxConfig.zoom = this.options.mapConfig.zoom.mobile;
+            } else {
+                this.options.mapboxConfig.center = this.options.mapConfig.center.desktop;
+                this.options.mapboxConfig.zoom = this.options.mapConfig.zoom.desktop;
+            }
         },
 
         /**
@@ -110,7 +129,7 @@ import _find from 'lodash/find';
             // Instantiate mapbox
             map = new mapboxgl.Map(this.options.mapboxConfig);
                 map.scrollZoom.disable();
-                map.addControl(new mapboxgl.NavigationControl(), 'top-left');
+                map.addControl(new mapboxgl.NavigationControl(), 'top-right');
 
             this.map = map;
 
@@ -148,18 +167,20 @@ import _find from 'lodash/find';
          * Handles the scroll event
          */
         scrollHandler() {
-            for (let i = 0; i < this.options.geojson.features.length; i++) {
-                let paneEl = document.querySelectorAll('.scrollmap-pane')[i];
-                if (this.isElementOnScreen(paneEl)) {
-                    this.activeId = paneEl.dataset.id;
-                    break;
-                } else if (window.scrollY === 0) {
-                    this.resetScrollmap();
-                    break;
+            if (!this.isToggled) {
+                for (let i = 0; i < this.options.geojson.features.length; i++) {
+                    let paneEl = document.querySelectorAll('.scrollmap-pane')[i];
+                    if (this.isElementOnScreen(paneEl)) {
+                        this.activeId = paneEl.dataset.id;
+                        break;
+                    } else if (window.scrollY === 0) {
+                        this.resetScrollmap();
+                        break;
+                    }
                 }
-            }
 
-            this.highlightActiveMarker(this.activeId);    
+                this.highlightActiveMarker(this.activeId);
+            }
         },
 
         /**
@@ -175,7 +196,8 @@ import _find from 'lodash/find';
                 markerEl[i].style.zIndex = 10 - i;
             }
 
-            this.map.panTo([100, 30]);
+            this.map.setZoom(defaultOptions.mapboxConfig.zoom);
+            this.map.panTo(defaultOptions.mapboxConfig.center);
             this.currentActiveId = this.activeId = null;
         },
 
@@ -195,7 +217,7 @@ import _find from 'lodash/find';
          * 
          */
         initWindowResizeEvent() {
-            $(window).on('resize', () => {
+            $(window).on('resize.scrollmap', () => {
                 this.checkScreenSize();
                 if (this.isToggled) {
                     this.toggleMap()
@@ -338,7 +360,7 @@ import _find from 'lodash/find';
          * 
          */
         initMarkerClickEvent() {
-            $(document).on('click', '.marker', (event) => {
+            $('#scrollmap').on('click', '.marker', (event) => {
                 if (this.isToggled) {
                     this.toggleMap()
                     window.setTimeout(() => {
@@ -354,12 +376,12 @@ import _find from 'lodash/find';
          * 
          */
         scrollMap(event) {
-            // console.log(event.currentTarget);
             let thisMarkerId = event.currentTarget.dataset.id;
 
             this.activeId = thisMarkerId;
-            this.highlightActiveMarker(this.activeId);    
 
+            this.highlightActiveMarker(this.activeId);    
+            
             let offset = $(`.scrollmap-pane[data-id=${thisMarkerId}]`)[0].offsetTop - 24;
             $('html, body').animate({
                 scrollTop: offset
@@ -378,6 +400,7 @@ import _find from 'lodash/find';
          */
         toggleMap() {
             if (!this.isToggled) {
+                $('.scrollmap-controls').addClass('is-toggled');
                 $('.scrollmap-map').css('height', '100%');
                 $('.scrollmap-content').css('display', 'none');
                 $('.scrollmap-controls').css({
@@ -387,12 +410,13 @@ import _find from 'lodash/find';
                 });
                 this.isToggled = true;
             } else {
+                $('.scrollmap-controls').removeClass('is-toggled');
                 $('.scrollmap-map, .scrollmap-content, .scrollmap-controls').removeAttr('style');
                 this.isToggled = false;
             }
 
+            // Resize the map
             this.map.resize();
-   
         }
 
     } // Scrollmap.prototype

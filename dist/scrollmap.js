@@ -3800,13 +3800,18 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
         debounceSpeed: 150,
         mapboxConfig: {
             container: 'scrollmap',
-            style: 'mapbox://styles/aosika/cj8tmsx9cdk3m2rqmxbq8gr1b',
-            // starting position (lng, lat),
-            center: [0, 0],
-            zoom: 1
+            style: 'mapbox://styles/aosika/cj8tmsx9cdk3m2rqmxbq8gr1b'
         },
         mapConfig: {
-            offset: 0
+            offset: 0,
+            center: {
+                mobile: [0, 0],
+                desktop: [0, 0]
+            },
+            zoom: {
+                mobile: 1,
+                desktop: 1
+            }
         },
         markerConfig: {
             color: '#FFF',
@@ -3827,7 +3832,10 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
     };var Scrollmap = function Scrollmap(userOptions) {
         // Combine/merge default and user options
         this.options = $.extend(true, defaultOptions, userOptions);
-        // Init
+
+        /**
+         * Init
+         */
         this.init();
         /**
          * Controller
@@ -3858,12 +3866,24 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
         init: function init() {
             this.checkScreenSize();
             this.initWindowResizeEvent();
+            this.assignDynaMap();
             this.getMapHeight();
             this.instantiateMap();
             this.initToggleEvent();
-            // console.log(this.options.geojson.features);
-            // console.log('wtf');
-            // console.log(this.options.markerConfig.images);
+        },
+
+
+        /**
+         * Assign initial center position
+         */
+        assignDynaMap: function assignDynaMap() {
+            if (this.isMobile) {
+                this.options.mapboxConfig.center = this.options.mapConfig.center.mobile;
+                this.options.mapboxConfig.zoom = this.options.mapConfig.zoom.mobile;
+            } else {
+                this.options.mapboxConfig.center = this.options.mapConfig.center.desktop;
+                this.options.mapboxConfig.zoom = this.options.mapConfig.zoom.desktop;
+            }
         },
 
 
@@ -3880,7 +3900,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
             // Instantiate mapbox
             map = new mapboxgl.Map(this.options.mapboxConfig);
             map.scrollZoom.disable();
-            map.addControl(new mapboxgl.NavigationControl(), 'top-left');
+            map.addControl(new mapboxgl.NavigationControl(), 'top-right');
 
             this.map = map;
 
@@ -3922,18 +3942,20 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
          * Handles the scroll event
          */
         scrollHandler: function scrollHandler() {
-            for (var i = 0; i < this.options.geojson.features.length; i++) {
-                var paneEl = document.querySelectorAll('.scrollmap-pane')[i];
-                if (this.isElementOnScreen(paneEl)) {
-                    this.activeId = paneEl.dataset.id;
-                    break;
-                } else if (window.scrollY === 0) {
-                    this.resetScrollmap();
-                    break;
+            if (!this.isToggled) {
+                for (var i = 0; i < this.options.geojson.features.length; i++) {
+                    var paneEl = document.querySelectorAll('.scrollmap-pane')[i];
+                    if (this.isElementOnScreen(paneEl)) {
+                        this.activeId = paneEl.dataset.id;
+                        break;
+                    } else if (window.scrollY === 0) {
+                        this.resetScrollmap();
+                        break;
+                    }
                 }
-            }
 
-            this.highlightActiveMarker(this.activeId);
+                this.highlightActiveMarker(this.activeId);
+            }
         },
 
 
@@ -3950,7 +3972,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
                 markerEl[i].style.zIndex = 10 - i;
             }
 
-            this.map.panTo([100, 30]);
+            this.map.setZoom(defaultOptions.mapboxConfig.zoom);
+            this.map.panTo(defaultOptions.mapboxConfig.center);
             this.currentActiveId = this.activeId = null;
         },
 
@@ -3973,7 +3996,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
         initWindowResizeEvent: function initWindowResizeEvent() {
             var _this3 = this;
 
-            $(window).on('resize', function () {
+            $(window).on('resize.scrollmap', function () {
                 _this3.checkScreenSize();
                 if (_this3.isToggled) {
                     _this3.toggleMap();
@@ -4119,7 +4142,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
         initMarkerClickEvent: function initMarkerClickEvent() {
             var _this5 = this;
 
-            $(document).on('click', '.marker', function (event) {
+            $('#scrollmap').on('click', '.marker', function (event) {
                 if (_this5.isToggled) {
                     _this5.toggleMap();
                     window.setTimeout(function () {
@@ -4136,10 +4159,10 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
          * 
          */
         scrollMap: function scrollMap(event) {
-            // console.log(event.currentTarget);
             var thisMarkerId = event.currentTarget.dataset.id;
 
             this.activeId = thisMarkerId;
+
             this.highlightActiveMarker(this.activeId);
 
             var offset = $('.scrollmap-pane[data-id=' + thisMarkerId + ']')[0].offsetTop - 24;
@@ -4162,6 +4185,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
          */
         toggleMap: function toggleMap() {
             if (!this.isToggled) {
+                $('.scrollmap-controls').addClass('is-toggled');
                 $('.scrollmap-map').css('height', '100%');
                 $('.scrollmap-content').css('display', 'none');
                 $('.scrollmap-controls').css({
@@ -4171,10 +4195,12 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
                 });
                 this.isToggled = true;
             } else {
+                $('.scrollmap-controls').removeClass('is-toggled');
                 $('.scrollmap-map, .scrollmap-content, .scrollmap-controls').removeAttr('style');
                 this.isToggled = false;
             }
 
+            // Resize the map
             this.map.resize();
         }
     }; // Scrollmap.prototype
