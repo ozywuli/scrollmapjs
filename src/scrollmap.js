@@ -157,6 +157,7 @@ import _find from 'lodash/find';
             // Instantiate mapbox
             map = new mapboxgl.Map(this.options.mapboxConfig);
                 map.scrollZoom.disable();
+                map.doubleClickZoom.disable();
                 map.addControl(new mapboxgl.NavigationControl(), 'top-right');
 
             this.map = map;
@@ -184,11 +185,11 @@ import _find from 'lodash/find';
                 })
             } else if (this.geometryType === "polygon") {
                 console.log('polygon');
-
                 this.options.geojson.features.forEach((polygon, index) => {
                     // Find and set the center for each polygon
                     polygon.geometry.center = getCentroid(polygon.geometry.coordinates[0]);
-                    this.generatePolygon(polygon, index)
+                    this.generatePolygon(polygon, index);
+                    this.initPolygonClickEvent(polygon, index);
                 })
             }
         }, // mapLoad()
@@ -202,7 +203,10 @@ import _find from 'lodash/find';
             // trigger scroll after map finishes loading
             this.scrollHandler();
             this.addScrollListener();
-            this.initMarkerClickEvent();
+
+            if (this.geometryType === "point") {
+                this.initMarkerClickEvent();
+            }
         }, // afterMapLoad()
 
 
@@ -491,24 +495,41 @@ import _find from 'lodash/find';
         }, // generatePolygon()
 
         /**
+         * Initialize polygon click event
+         */
+        initPolygonClickEvent(polygon, index) {
+            this.map.on('click', polygon.properties.name.toLowerCase(), (event) => {
+                if (this.isToggled) {
+                    this.toggleMap()
+                    window.setTimeout(() => {
+                        this.scrollMap(event);
+                    }, 200)
+                } else {
+                    this.scrollMap(event);
+                }
+            })
+        }, // initPolygonClickEvent()
+
+
+        /**
          * Scroll the map
          */
         scrollMap(event) {
-            // get target ID
-            let thisMarkerId = event.currentTarget.dataset.id;
-
-            // Set the active marker ID
-            this.activeId = thisMarkerId;
-
-            // highlight marker based on active marker ID
             if (this.geometryType === 'point') {
+                // get target ID
+                let thisMarkerId = event.currentTarget.dataset.id;
+                // Set the active marker ID
+                this.activeId = thisMarkerId;
+                // highlight marker based on active marker ID
                 this.highlightActiveMarker(this.activeId);    
             } else if (this.geometryType === 'polygon') {
+                let thisPolygonId = event.features[0].layer.id;
+                this.activeId = thisPolygonId;
                 this.highlightActivePolygon(this.activeId);
             }
 
             // set the offset for the scroll to pane
-            let offset = $(`.scrollmap-pane[data-id=${thisMarkerId}]`)[0].offsetTop - 24;
+            let offset = $(`.scrollmap-pane[data-id=${this.activeId}]`)[0].offsetTop - 24;
 
             // Notify that scrolling has been initiated
             this.isScrolling = true;
@@ -516,7 +537,7 @@ import _find from 'lodash/find';
             // animate scroll to the pane
             $('html').animate({
                 scrollTop: offset
-            }, () => {
+            }, 150, () => {
                 // Notify that scrolling has been completed
                 this.isScrolling = false;
             });
@@ -566,5 +587,3 @@ import _find from 'lodash/find';
     module.exports = Scrollmap;
 
 })( jQuery, window , document );
-
-

@@ -4007,6 +4007,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
             // Instantiate mapbox
             map = new mapboxgl.Map(this.options.mapboxConfig);
             map.scrollZoom.disable();
+            map.doubleClickZoom.disable();
             map.addControl(new mapboxgl.NavigationControl(), 'top-right');
 
             this.map = map;
@@ -4036,11 +4037,11 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
                 });
             } else if (this.geometryType === "polygon") {
                 console.log('polygon');
-
                 this.options.geojson.features.forEach(function (polygon, index) {
                     // Find and set the center for each polygon
                     polygon.geometry.center = (0, _getCentroid2.default)(polygon.geometry.coordinates[0]);
                     _this2.generatePolygon(polygon, index);
+                    _this2.initPolygonClickEvent(polygon, index);
                 });
             }
         },
@@ -4055,7 +4056,10 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
             // trigger scroll after map finishes loading
             this.scrollHandler();
             this.addScrollListener();
-            this.initMarkerClickEvent();
+
+            if (this.geometryType === "point") {
+                this.initMarkerClickEvent();
+            }
         },
         // afterMapLoad()
 
@@ -4360,26 +4364,46 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
         // generatePolygon()
 
         /**
+         * Initialize polygon click event
+         */
+        initPolygonClickEvent: function initPolygonClickEvent(polygon, index) {
+            var _this8 = this;
+
+            this.map.on('click', polygon.properties.name.toLowerCase(), function (event) {
+                if (_this8.isToggled) {
+                    _this8.toggleMap();
+                    window.setTimeout(function () {
+                        _this8.scrollMap(event);
+                    }, 200);
+                } else {
+                    _this8.scrollMap(event);
+                }
+            });
+        },
+        // initPolygonClickEvent()
+
+
+        /**
          * Scroll the map
          */
         scrollMap: function scrollMap(event) {
-            var _this8 = this;
+            var _this9 = this;
 
-            // get target ID
-            var thisMarkerId = event.currentTarget.dataset.id;
-
-            // Set the active marker ID
-            this.activeId = thisMarkerId;
-
-            // highlight marker based on active marker ID
             if (this.geometryType === 'point') {
+                // get target ID
+                var thisMarkerId = event.currentTarget.dataset.id;
+                // Set the active marker ID
+                this.activeId = thisMarkerId;
+                // highlight marker based on active marker ID
                 this.highlightActiveMarker(this.activeId);
             } else if (this.geometryType === 'polygon') {
+                var thisPolygonId = event.features[0].layer.id;
+                this.activeId = thisPolygonId;
                 this.highlightActivePolygon(this.activeId);
             }
 
             // set the offset for the scroll to pane
-            var offset = $('.scrollmap-pane[data-id=' + thisMarkerId + ']')[0].offsetTop - 24;
+            var offset = $('.scrollmap-pane[data-id=' + this.activeId + ']')[0].offsetTop - 24;
 
             // Notify that scrolling has been initiated
             this.isScrolling = true;
@@ -4387,9 +4411,9 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
             // animate scroll to the pane
             $('html').animate({
                 scrollTop: offset
-            }, function () {
+            }, 150, function () {
                 // Notify that scrolling has been completed
-                _this8.isScrolling = false;
+                _this9.isScrolling = false;
             });
         },
         // scrollmap()
