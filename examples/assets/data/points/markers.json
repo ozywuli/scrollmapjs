@@ -1,0 +1,135 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "burj-khalifa"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          55.27413725852966,
+          25.197218714021272
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "shanghai-tower"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.50130033493042,
+          31.235550168856797
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "clock-tower"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+            39.825533,
+            21.418880
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "ping-an"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+            114.055865,
+            22.533205
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "lotte-world"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+            127.102581,
+            37.512974
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "wtc"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+            -74.013418,
+            40.712954
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "guangzhou-ctf"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+            113.325974,
+            23.117887
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "taipei-101"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+            121.564478,
+            25.034117
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "shanghai-wfc"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+            121.507417,
+            31.235114
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "international-commerce"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+            114.160169,
+            22.303392
+        ]
+      }
+    }
+  ]
+}

@@ -1106,7 +1106,7 @@ function castPath(value, object) {
 
 module.exports = castPath;
 
-},{"./_isKey":63,"./_stringToPath":95,"./isArray":106,"./toString":124}],42:[function(require,module,exports){
+},{"./_isKey":63,"./_stringToPath":95,"./isArray":106,"./toString":125}],42:[function(require,module,exports){
 var root = require('./_root');
 
 /** Used to detect overreaching core-js shims. */
@@ -2784,7 +2784,7 @@ function debounce(func, wait, options) {
 
 module.exports = debounce;
 
-},{"./isObject":111,"./now":117,"./toNumber":123}],99:[function(require,module,exports){
+},{"./isObject":111,"./now":117,"./toNumber":124}],99:[function(require,module,exports){
 /**
  * Performs a
  * [`SameValueZero`](http://ecma-international.org/ecma-262/7.0/#sec-samevaluezero)
@@ -2924,7 +2924,7 @@ function findIndex(array, predicate, fromIndex) {
 
 module.exports = findIndex;
 
-},{"./_baseFindIndex":20,"./_baseIteratee":31,"./toInteger":122}],102:[function(require,module,exports){
+},{"./_baseFindIndex":20,"./_baseIteratee":31,"./toInteger":123}],102:[function(require,module,exports){
 var baseGet = require('./_baseGet');
 
 /**
@@ -3578,6 +3578,77 @@ function stubFalse() {
 module.exports = stubFalse;
 
 },{}],121:[function(require,module,exports){
+var debounce = require('./debounce'),
+    isObject = require('./isObject');
+
+/** Error message constants. */
+var FUNC_ERROR_TEXT = 'Expected a function';
+
+/**
+ * Creates a throttled function that only invokes `func` at most once per
+ * every `wait` milliseconds. The throttled function comes with a `cancel`
+ * method to cancel delayed `func` invocations and a `flush` method to
+ * immediately invoke them. Provide `options` to indicate whether `func`
+ * should be invoked on the leading and/or trailing edge of the `wait`
+ * timeout. The `func` is invoked with the last arguments provided to the
+ * throttled function. Subsequent calls to the throttled function return the
+ * result of the last `func` invocation.
+ *
+ * **Note:** If `leading` and `trailing` options are `true`, `func` is
+ * invoked on the trailing edge of the timeout only if the throttled function
+ * is invoked more than once during the `wait` timeout.
+ *
+ * If `wait` is `0` and `leading` is `false`, `func` invocation is deferred
+ * until to the next tick, similar to `setTimeout` with a timeout of `0`.
+ *
+ * See [David Corbacho's article](https://css-tricks.com/debouncing-throttling-explained-examples/)
+ * for details over the differences between `_.throttle` and `_.debounce`.
+ *
+ * @static
+ * @memberOf _
+ * @since 0.1.0
+ * @category Function
+ * @param {Function} func The function to throttle.
+ * @param {number} [wait=0] The number of milliseconds to throttle invocations to.
+ * @param {Object} [options={}] The options object.
+ * @param {boolean} [options.leading=true]
+ *  Specify invoking on the leading edge of the timeout.
+ * @param {boolean} [options.trailing=true]
+ *  Specify invoking on the trailing edge of the timeout.
+ * @returns {Function} Returns the new throttled function.
+ * @example
+ *
+ * // Avoid excessively updating the position while scrolling.
+ * jQuery(window).on('scroll', _.throttle(updatePosition, 100));
+ *
+ * // Invoke `renewToken` when the click event is fired, but not more than once every 5 minutes.
+ * var throttled = _.throttle(renewToken, 300000, { 'trailing': false });
+ * jQuery(element).on('click', throttled);
+ *
+ * // Cancel the trailing throttled invocation.
+ * jQuery(window).on('popstate', throttled.cancel);
+ */
+function throttle(func, wait, options) {
+  var leading = true,
+      trailing = true;
+
+  if (typeof func != 'function') {
+    throw new TypeError(FUNC_ERROR_TEXT);
+  }
+  if (isObject(options)) {
+    leading = 'leading' in options ? !!options.leading : leading;
+    trailing = 'trailing' in options ? !!options.trailing : trailing;
+  }
+  return debounce(func, wait, {
+    'leading': leading,
+    'maxWait': wait,
+    'trailing': trailing
+  });
+}
+
+module.exports = throttle;
+
+},{"./debounce":98,"./isObject":111}],122:[function(require,module,exports){
 var toNumber = require('./toNumber');
 
 /** Used as references for various `Number` constants. */
@@ -3621,7 +3692,7 @@ function toFinite(value) {
 
 module.exports = toFinite;
 
-},{"./toNumber":123}],122:[function(require,module,exports){
+},{"./toNumber":124}],123:[function(require,module,exports){
 var toFinite = require('./toFinite');
 
 /**
@@ -3659,7 +3730,7 @@ function toInteger(value) {
 
 module.exports = toInteger;
 
-},{"./toFinite":121}],123:[function(require,module,exports){
+},{"./toFinite":122}],124:[function(require,module,exports){
 var isObject = require('./isObject'),
     isSymbol = require('./isSymbol');
 
@@ -3727,7 +3798,7 @@ function toNumber(value) {
 
 module.exports = toNumber;
 
-},{"./isObject":111,"./isSymbol":113}],124:[function(require,module,exports){
+},{"./isObject":111,"./isSymbol":113}],125:[function(require,module,exports){
 var baseToString = require('./_baseToString');
 
 /**
@@ -3757,7 +3828,7 @@ function toString(value) {
 
 module.exports = toString;
 
-},{"./_baseToString":38}],125:[function(require,module,exports){
+},{"./_baseToString":38}],126:[function(require,module,exports){
 'use strict';
 
 var _config = require('../config');
@@ -3767,6 +3838,10 @@ var _config2 = _interopRequireDefault(_config);
 var _debounce2 = require('lodash/debounce');
 
 var _debounce3 = _interopRequireDefault(_debounce2);
+
+var _throttle2 = require('lodash/throttle');
+
+var _throttle3 = _interopRequireDefault(_throttle2);
 
 var _find2 = require('lodash/find');
 
@@ -3778,15 +3853,15 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 // net against concatenated scripts and/or other plugins
 // that are not closed properly.
 // the anonymous function protects the `$` alias from name collisions
-; /**
-   * Scrollmap.js
-   * @author Ozy Wu-Li - @ousikaa
-   * @description Scrolling map
-   */
+/**
+ * Scrollmap.js
+ * @author Ozy Wu-Li - @ousikaa
+ * @description Scrolling map
+ */
 
 // https://github.com/jquery-boilerplate/jquery-patterns/blob/master/patterns/jquery.basic.plugin-boilerplate.js
 
-(function ($, window, document, undefined) {
+;(function ($, window, document, undefined) {
     /**
      * Plugin name
      */
@@ -3797,7 +3872,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
      */
     var defaultOptions = {
         data: null,
-        debounceSpeed: 150,
+        throttleSpeed: 500,
         mapboxConfig: {
             container: 'scrollmap',
             style: 'mapbox://styles/aosika/cj8tmsx9cdk3m2rqmxbq8gr1b'
@@ -3824,7 +3899,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
                 default: '/images/map-marker.png',
                 active: '/images/map-marker-active.png'
             }
-        }
+        } // defaultOptions{}
+
 
         /**
          * Scrollmap constructor
@@ -3848,14 +3924,14 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
     };
 
     /**
-     * 
+     * Protoype for ScrollMap
      */
     Scrollmap.prototype = {
         map: null,
         activeId: null,
         currentActiveId: null,
         allowPan: true,
-        isSrolling: false,
+        isScrolling: false,
         isMobile: true,
         mapOffset: null,
         isToggled: false,
@@ -3942,25 +4018,28 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
          * Handles the scroll event
          */
         scrollHandler: function scrollHandler() {
-            if (!this.isToggled) {
-                for (var i = 0; i < this.options.geojson.features.length; i++) {
-                    var paneEl = document.querySelectorAll('.scrollmap-pane')[i];
-                    if (this.isElementOnScreen(paneEl)) {
-                        this.activeId = paneEl.dataset.id;
-                        break;
-                    } else if (window.scrollY === 0) {
-                        this.resetScrollmap();
-                        break;
+            // console.log('throttling');
+            if (!this.isScrolling) {
+                if (!this.isToggled) {
+                    for (var i = 0; i < this.options.geojson.features.length; i++) {
+                        var paneEl = document.querySelectorAll('.scrollmap-pane')[i];
+                        if (this.isElementOnScreen(paneEl)) {
+                            this.activeId = paneEl.dataset.id;
+                            break;
+                        } else if (window.scrollY === 0) {
+                            this.resetScrollmap();
+                            break;
+                        }
                     }
-                }
 
-                this.highlightActiveMarker(this.activeId);
+                    this.highlightActiveMarker(this.activeId);
+                }
             }
         },
 
 
         /**
-         * 
+         * Reset scrollmap
          */
         resetScrollmap: function resetScrollmap() {
             var markerImgEl = document.querySelectorAll('.marker-img');
@@ -3991,7 +4070,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 
         /**
-         * 
+         * Initialize window resize event
          */
         initWindowResizeEvent: function initWindowResizeEvent() {
             var _this3 = this;
@@ -4006,7 +4085,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 
         /**
-         * 
+         * Get the height of the map
          */
         getMapHeight: function getMapHeight() {
             var scrollmapEl = document.querySelector('.scrollmap-map');
@@ -4061,12 +4140,13 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
          */
         addScrollListener: function addScrollListener() {
             // console.log('add scroll listener');
-            window.addEventListener('scroll', (0, _debounce3.default)(this.scrollHandler.bind(this), this.options.debounceSpeed), true);
+            // window.addEventListener('scroll', _debounce(this.scrollHandler.bind(this), this.options.debounceSpeed), true);
+            window.addEventListener('scroll', (0, _throttle3.default)(this.scrollHandler.bind(this), this.options.throttleSpeed), true);
         },
 
 
         /**
-         * 
+         * Handle the pan event
          */
         panHandler: function panHandler(coords) {
             this.map.panTo(coords);
@@ -4138,7 +4218,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 
         /**
-         * 
+         * Initialize marker click event
          */
         initMarkerClickEvent: function initMarkerClickEvent() {
             var _this5 = this;
@@ -4157,32 +4237,46 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 
         /**
-         * 
+         * Scroll the map
          */
         scrollMap: function scrollMap(event) {
+            var _this6 = this;
+
+            // get target ID
             var thisMarkerId = event.currentTarget.dataset.id;
 
+            // Set the active marker ID
             this.activeId = thisMarkerId;
 
+            // highlight marker based on active marker ID
             this.highlightActiveMarker(this.activeId);
 
+            // set the offset for the scroll to pane
             var offset = $('.scrollmap-pane[data-id=' + thisMarkerId + ']')[0].offsetTop - 24;
-            $('html, body').animate({
+
+            // Notify that scrolling has been initiated
+            this.isScrolling = true;
+
+            // animate scroll to the pane
+            $('html').animate({
                 scrollTop: offset
+            }, function () {
+                // Notify that scrolling has been completed
+                _this6.isScrolling = false;
             });
         },
 
 
         /**
-         * 
+         * Initialize map toggle event
          */
         initToggleEvent: function initToggleEvent() {
             $('.scrollmap__toggle-map').on('click', this.toggleMap.bind(this));
         },
-
+        // initToggleEvent()
 
         /**
-         * 
+         * Toggles the map
          */
         toggleMap: function toggleMap() {
             if (!this.isToggled) {
@@ -4203,7 +4297,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
             // Resize the map
             this.map.resize();
-        }
+        } // toggleMap()
+
     }; // Scrollmap.prototype
 
 
@@ -4213,5 +4308,5 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
     module.exports = Scrollmap;
 })(jQuery, window, document);
 
-},{"../config":1,"lodash/debounce":98,"lodash/find":100}]},{},[125])(125)
+},{"../config":1,"lodash/debounce":98,"lodash/find":100,"lodash/throttle":121}]},{},[126])(126)
 });

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+    <meta charset="utf-8">
+
+    <title>Scrollmap.js | Polygon Example</title>
+
+    <!-- behavioral meta data -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+    <!-- vendor styles -->
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.43.0/mapbox-gl.css' rel='stylesheet' />
+
+
+    <!-- styles -->
+    <link rel="stylesheet" type="text/css" href="styles.css"/>
+
+</head>
+<body>
+
+<div class="scrollmap-container">
+    <!-- Map -->
+    <div id="scrollmap" class="scrollmap-map"></div>
+
+    <!-- CONTROLS -->
+    <div class="scrollmap-controls">
+        <a 
+            href="#" 
+            class="scrollmap__toggle-map"
+        >
+            more map
+        </a>
+    </div>
+
+    <div class="scrollmap-content">
+        <!-- INTRO PANE -->
+        <div class="scrollmap-intro">
+            <h1>10 Tallest Buildings in the World</h1>
+            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Temporibus explicabo, sunt maiores laboriosam, voluptate dolor aspernatur nam ipsa soluta deleniti, molestiae quisquam corporis incidunt. Omnis temporibus alias animi beatae, molestias?</p>
+        </div>
+        <!-- Panes -->
+        <div class="scrollmap-panes">    
+            <!-- Pane -->
+        </div>
+
+        <!-- Recommended -->
+        <div class="scrollmap-recommended">
+            <h2 class="scrollmap-recommended__title">
+                Recommended Posts
+            </h2>
+            <ul class="scrollmap-recommended__list">
+                <li class="scrollmap-recommended__list-item">
+                    <a 
+                        href="#" 
+                        class="scrollmap-recommended__list-anchor"
+                    >
+                        <div class="scrollmap-recommended__bg">
+                            <div class="scrollmap-recommended__overlay"></div>
+                        </div>
+                        <div class="scrollmap-recommended__meta">
+                            <h2 class="scrollmap-recommended__meta-title">
+                                10 Largest Hydroelectric Power Stations in the World       
+                            </h2>
+                        </div>
+                    </a>
+                </li>
+                <li class="scrollmap-recommended__list-item">
+                    <a 
+                        href="#" 
+                        class="scrollmap-recommended__list-anchor"
+                    >
+                        <div class="scrollmap-recommended__bg">
+                            <div class="scrollmap-recommended__overlay"></div>
+                        </div>
+                        <div class="scrollmap-recommended__meta">
+                            <h2 class="scrollmap-recommended__meta-title">
+                                10 Longest Bridges in the World        
+                            </h2>
+                        </div>
+                    </a>
+                </li>
+                <li class="scrollmap-recommended__list-item">
+                    <a 
+                        href="#" 
+                        class="scrollmap-recommended__list-anchor"
+                    >
+                        <div class="scrollmap-recommended__bg">
+                            <div class="scrollmap-recommended__overlay"></div>
+                        </div>
+                        <div class="scrollmap-recommended__meta">
+                            <h2 class="scrollmap-recommended__meta-title">
+                                10 Largest Solar Power Plants in the World           
+                            </h2>
+                        </div>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div><!-- / Recommended -->
+
+</div>
+
+
+<!-- vendor scripts -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
+<script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.43.0/mapbox-gl.js'></script>
+
+<!-- scripts -->
+<script src="./scrollmap.js"></script>
+
+<script>
+
+// ajax request for region locations
+let getRegionLocations = new Promise((resolve, reject) => {
+    $.getJSON('/data/points/markers.json', (data) => {
+        resolve(data)
+    });
+})
+
+// ajax request for region info
+let getRegionInfo = new Promise((resolve, reject) => {
+    $.getJSON('/data/points/info.json', (data) => {
+        for (let i = 0; i < data.features.length; i++) {
+            $('.scrollmap-panes').append(`
+                <section 
+                    class="scrollmap-pane"
+                    data-id="${data.features[i].id}"
+                >
+                    <div class="scrollmap-pane__container">
+                        <header class="scrollmap-pane__head">
+                            <h2 class="scrollmap-pane__title">
+                                ${data.features[i].title}
+                            </h2>
+                            <h3 class="scrollmap-pane__subtitle">
+                                ${data.features[i].subtitle}
+                            </h3>
+                        </header>
+                        <figure class="scrollmap-pane__fig">
+                            <div class="scrollmap-pane__fig-container">
+                                <div class="scrollmap-pane__fig-frame">
+                                    <img src="http://placehold.it/400x225" alt="image" class="scrollmap-pane__fig-img">
+                                </div>
+                                <figcaption class="scrollmap-pane__caption">
+                                    Image caption
+                                </figcaption>
+                            </div>
+                        </figure>
+                        <div class="scrollmap-pane__content">
+                            <p class="scrollmap-pane__description">
+                                ${data.features[i].description}
+                            </p>
+                            <div class="scrollmap-pane__btns">
+                                <a 
+                                    href="${data.features[i].wikiUrl}" 
+                                    class="scrollmap-pane__btn"
+                                    target="_blank"
+                                >
+                                    wiki info
+                                </a>
+                                <a 
+                                    href="${data.features[i].moreImagesUrl}" 
+                                    class="scrollmap-pane__btn"
+                                    target="_blank"
+                                >
+                                    more images
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            `);
+
+        }
+        resolve(data)
+    });
+})
+
+// store the promises
+let regionPromises = [
+    getRegionLocations,
+    getRegionInfo
+]
+
+// wait for all promises to finish loading
+Promise.all(regionPromises)
+    .then((data) => {
+
+        let regionLocations = data[0];
+        let regionInfo = data[1];
+
+        let myScrollmap = new Scrollmap({
+            geojson: regionLocations,
+            mapboxToken: 'abc',
+            mapboxConfig: {
+                container: 'scrollmap', // container id
+                style: 'mapbox://styles/aosika/cjbepjvcn94182rmrjfnpudra', //stylesheet location
+                center: [100, 30], // starting position (lng, lat),
+                zoom: 3
+            }
+        });
+
+        myScrollmap.controller.loaded = (map) => {
+            // console.log(map);
+        }
+    })
+
+
+
+
+</script>
+
+</body>
+</html>

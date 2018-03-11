@@ -8,6 +8,7 @@
 
 import config from '../config';
 import _debounce from 'lodash/debounce';
+import _throttle from 'lodash/throttle';
 import _find from 'lodash/find';
 
 
@@ -27,7 +28,7 @@ import _find from 'lodash/find';
      */
     let defaultOptions = {
         data: null,
-        debounceSpeed: 150,
+        throttleSpeed: 500,
         mapboxConfig: {
             container: 'scrollmap',
             style: 'mapbox://styles/aosika/cj8tmsx9cdk3m2rqmxbq8gr1b'
@@ -55,7 +56,7 @@ import _find from 'lodash/find';
                 active: '/images/map-marker-active.png'
             }
         }
-    }
+    } // defaultOptions{}
 
 
     /**
@@ -81,14 +82,14 @@ import _find from 'lodash/find';
 
 
     /**
-     * 
+     * Protoype for ScrollMap
      */
     Scrollmap.prototype = {
         map: null,
         activeId: null,
         currentActiveId: null,
         allowPan: true,
-        isSrolling: false,
+        isScrolling: false,
         isMobile: true,
         mapOffset: null,
         isToggled: false,
@@ -167,24 +168,27 @@ import _find from 'lodash/find';
          * Handles the scroll event
          */
         scrollHandler() {
-            if (!this.isToggled) {
-                for (let i = 0; i < this.options.geojson.features.length; i++) {
-                    let paneEl = document.querySelectorAll('.scrollmap-pane')[i];
-                    if (this.isElementOnScreen(paneEl)) {
-                        this.activeId = paneEl.dataset.id;
-                        break;
-                    } else if (window.scrollY === 0) {
-                        this.resetScrollmap();
-                        break;
+            // console.log('throttling');
+            if (!this.isScrolling) {
+                if (!this.isToggled) {
+                    for (let i = 0; i < this.options.geojson.features.length; i++) {
+                        let paneEl = document.querySelectorAll('.scrollmap-pane')[i];
+                        if (this.isElementOnScreen(paneEl)) {
+                            this.activeId = paneEl.dataset.id;
+                            break;
+                        } else if (window.scrollY === 0) {
+                            this.resetScrollmap();
+                            break;
+                        }
                     }
-                }
 
-                this.highlightActiveMarker(this.activeId);
+                    this.highlightActiveMarker(this.activeId);
+                }
             }
         },
 
         /**
-         * 
+         * Reset scrollmap
          */
         resetScrollmap() {
             let markerImgEl = document.querySelectorAll('.marker-img');
@@ -214,7 +218,7 @@ import _find from 'lodash/find';
 
 
         /**
-         * 
+         * Initialize window resize event
          */
         initWindowResizeEvent() {
             $(window).on('resize.scrollmap', () => {
@@ -226,7 +230,7 @@ import _find from 'lodash/find';
         },
 
         /**
-         * 
+         * Get the height of the map
          */
         getMapHeight() {
             let scrollmapEl = document.querySelector('.scrollmap-map');
@@ -277,12 +281,13 @@ import _find from 'lodash/find';
          */
         addScrollListener() {
             // console.log('add scroll listener');
-            window.addEventListener('scroll', _debounce(this.scrollHandler.bind(this), this.options.debounceSpeed), true);
+            // window.addEventListener('scroll', _debounce(this.scrollHandler.bind(this), this.options.debounceSpeed), true);
+            window.addEventListener('scroll', _throttle(this.scrollHandler.bind(this), this.options.throttleSpeed), true);
         },
 
 
         /**
-         * 
+         * Handle the pan event
          */
         panHandler(coords) {
             this.map.panTo(coords);
@@ -358,7 +363,7 @@ import _find from 'lodash/find';
         },
 
         /**
-         * 
+         * Initialize marker click event
          */
         initMarkerClickEvent() {
             $('#scrollmap').on('click', '.marker', (event) => {
@@ -374,30 +379,42 @@ import _find from 'lodash/find';
         },
 
         /**
-         * 
+         * Scroll the map
          */
         scrollMap(event) {
+            // get target ID
             let thisMarkerId = event.currentTarget.dataset.id;
 
+            // Set the active marker ID
             this.activeId = thisMarkerId;
 
+            // highlight marker based on active marker ID
             this.highlightActiveMarker(this.activeId);    
             
+            // set the offset for the scroll to pane
             let offset = $(`.scrollmap-pane[data-id=${thisMarkerId}]`)[0].offsetTop - 24;
-            $('html, body').animate({
+
+            // Notify that scrolling has been initiated
+            this.isScrolling = true;
+
+            // animate scroll to the pane
+            $('html').animate({
                 scrollTop: offset
+            }, () => {
+                // Notify that scrolling has been completed
+                this.isScrolling = false;
             });
         },
 
         /**
-         * 
+         * Initialize map toggle event
          */
         initToggleEvent() {
             $('.scrollmap__toggle-map').on('click', this.toggleMap.bind(this));
-        },
+        }, // initToggleEvent()
 
         /**
-         * 
+         * Toggles the map
          */
         toggleMap() {
             if (!this.isToggled) {
@@ -418,7 +435,7 @@ import _find from 'lodash/find';
 
             // Resize the map
             this.map.resize();
-        }
+        } // toggleMap()
 
     } // Scrollmap.prototype
 

@@ -44,6 +44,8 @@
         <div class="scrollmap-panes">    
             <!-- Pane -->
         </div>
+
+        <!-- Recommended -->
         <div class="scrollmap-recommended">
             <h2 class="scrollmap-recommended__title">
                 Recommended Posts
@@ -96,7 +98,7 @@
                 </li>
             </ul>
         </div>
-    </div>
+    </div><!-- / Recommended -->
 
 </div>
 
@@ -112,14 +114,14 @@
 
 // ajax request for region locations
 let getRegionLocations = new Promise((resolve, reject) => {
-    $.getJSON('/data/skyscraper-markers.json', (data) => {
+    $.getJSON('/data/points/markers.json', (data) => {
         resolve(data)
     });
 })
 
 // ajax request for region info
 let getRegionInfo = new Promise((resolve, reject) => {
-    $.getJSON('/data/skyscraper-info.json', (data) => {
+    $.getJSON('/data/points/info.json', (data) => {
         for (let i = 0; i < data.features.length; i++) {
             $('.scrollmap-panes').append(`
                 <section 
