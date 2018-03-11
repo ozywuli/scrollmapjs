@@ -1,0 +1,201 @@
+{
+    "features": [
+        {
+            "id": "guangdong",
+            "title": "guangdong",
+            "subtitle": "The tallest building in the world",
+            "description": "The Burj Khalifa towers over all. It's almost 200 meters (700 feet) taller than the Shanghai Tower, the world's second tallest building, and nearly twice as tall as the Empire State Building, which once stood as the world's tallest building from 1931 to 1970.",
+            "wikiUrl": "https://en.wikipedia.org/wiki/Burj_Khalifa",
+            "moreImagesUrl": "http://www.bing.com/images/search?q=burj+khalifa&form=HDRSC2&first=1&cw=1063&ch=1290",
+            "stats": {
+              "city": "Dubai",
+              "cost": "USD $1.5 billion",
+              "country": "United Arab Emirates",
+              "floors": 163,
+              "height": {
+                "feet": 2717,
+                "meters": 828
+              },
+              "year": 2010
+            },
+            "fill": "#0074D9"
+        },
+        {
+            "id": "sichuan",
+            "title": "sichuan",
+            "subtitle": "The spiciest and hottest of all Chinese cuisine",
+            "description": "Lorem ipsum dolor sit amet, consectetur adipisicing elit. In dicta debitis, esse, deserunt itaque, porro quibusdam iusto excepturi delectus odit consequuntur quas et ipsam. Veniam eligendi reiciendis aliquid sint animi?",
+            "subtitle": "The tallest building in the world",
+            "description": "The Burj Khalifa towers over all. It's almost 200 meters (700 feet) taller than the Shanghai Tower, the world's second tallest building, and nearly twice as tall as the Empire State Building, which once stood as the world's tallest building from 1931 to 1970.",
+            "wikiUrl": "https://en.wikipedia.org/wiki/Burj_Khalifa",
+            "moreImagesUrl": "http://www.bing.com/images/search?q=burj+khalifa&form=HDRSC2&first=1&cw=1063&ch=1290",
+            "stats": {
+              "city": "Dubai",
+              "cost": "USD $1.5 billion",
+              "country": "United Arab Emirates",
+              "floors": 163,
+              "height": {
+                "feet": 2717,
+                "meters": 828
+              },
+              "year": 2010
+            },
+            "fill": "#FF4136"
+        },
+        {
+            "id": "jiangsu",
+            "title": "jiangsu",
+            "subtitle": "This is a subtitle",
+            "description": "Lorem ipsum dolor sit amet, consectetur adipisicing elit. In dicta debitis, esse, deserunt itaque, porro quibusdam iusto excepturi delectus odit consequuntur quas et ipsam. Veniam eligendi reiciendis aliquid sint animi?",
+            "subtitle": "The tallest building in the world",
+            "description": "The Burj Khalifa towers over all. It's almost 200 meters (700 feet) taller than the Shanghai Tower, the world's second tallest building, and nearly twice as tall as the Empire State Building, which once stood as the world's tallest building from 1931 to 1970.",
+            "wikiUrl": "https://en.wikipedia.org/wiki/Burj_Khalifa",
+            "moreImagesUrl": "http://www.bing.com/images/search?q=burj+khalifa&form=HDRSC2&first=1&cw=1063&ch=1290",
+            "stats": {
+              "city": "Dubai",
+              "cost": "USD $1.5 billion",
+              "country": "United Arab Emirates",
+              "floors": 163,
+              "height": {
+                "feet": 2717,
+                "meters": 828
+              },
+              "year": 2010
+            },
+            "fill": "#39CCCC"
+        },
+        {
+            "id": "zhejiang",
+            "title": "zhejiang",
+            "subtitle": "This is a subtitle",
+            "description": "Lorem ipsum dolor sit amet, consectetur adipisicing elit. In dicta debitis, esse, deserunt itaque, porro quibusdam iusto excepturi delectus odit consequuntur quas et ipsam. Veniam eligendi reiciendis aliquid sint animi?",
+            "subtitle": "The tallest building in the world",
+            "description": "The Burj Khalifa towers over all. It's almost 200 meters (700 feet) taller than the Shanghai Tower, the world's second tallest building, and nearly twice as tall as the Empire State Building, which once stood as the world's tallest building from 1931 to 1970.",
+            "wikiUrl": "https://en.wikipedia.org/wiki/Burj_Khalifa",
+            "moreImagesUrl": "http://www.bing.com/images/search?q=burj+khalifa&form=HDRSC2&first=1&cw=1063&ch=1290",
+            "stats": {
+              "city": "Dubai",
+              "cost": "USD $1.5 billion",
+              "country": "United Arab Emirates",
+              "floors": 163,
+              "height": {
+                "feet": 2717,
+                "meters": 828
+              },
+              "year": 2010
+            },
+            "fill": "#2ECC40"
+        },
+        {
+            "id": "hunan",
+            "title": "hunan",
+            "subtitle": "This is a subtitle",
+            "description": "Lorem ipsum dolor sit amet, consectetur adipisicing elit. In dicta debitis, esse, deserunt itaque, porro quibusdam iusto excepturi delectus odit consequuntur quas et ipsam. Veniam eligendi reiciendis aliquid sint animi?",
+            "subtitle": "The tallest building in the world",
+            "description": "The Burj Khalifa towers over all. It's almost 200 meters (700 feet) taller than the Shanghai Tower, the world's second tallest building, and nearly twice as tall as the Empire State Building, which once stood as the world's tallest building from 1931 to 1970.",
+            "wikiUrl": "https://en.wikipedia.org/wiki/Burj_Khalifa",
+            "moreImagesUrl": "http://www.bing.com/images/search?q=burj+khalifa&form=HDRSC2&first=1&cw=1063&ch=1290",
+            "stats": {
+              "city": "Dubai",
+              "cost": "USD $1.5 billion",
+              "country": "United Arab Emirates",
+              "floors": 163,
+              "height": {
+                "feet": 2717,
+                "meters": 828
+              },
+              "year": 2010
+            },
+            "fill": "#3D9970"
+        },
+        {
+            "id": "shandong",
+            "title": "shandong",
+            "subtitle": "This is a subtitle",
+            "description": "Lorem ipsum dolor sit amet, consectetur adipisicing elit. In dicta debitis, esse, deserunt itaque, porro quibusdam iusto excepturi delectus odit consequuntur quas et ipsam. Veniam eligendi reiciendis aliquid sint animi?",
+            "subtitle": "The tallest building in the world",
+            "description": "The Burj Khalifa towers over all. It's almost 200 meters (700 feet) taller than the Shanghai Tower, the world's second tallest building, and nearly twice as tall as the Empire State Building, which once stood as the world's tallest building from 1931 to 1970.",
+            "wikiUrl": "https://en.wikipedia.org/wiki/Burj_Khalifa",
+            "moreImagesUrl": "http://www.bing.com/images/search?q=burj+khalifa&form=HDRSC2&first=1&cw=1063&ch=1290",
+            "stats": {
+              "city": "Dubai",
+              "cost": "USD $1.5 billion",
+              "country": "United Arab Emirates",
+              "floors": 163,
+              "height": {
+                "feet": 2717,
+                "meters": 828
+              },
+              "year": 2010
+            },
+            "fill": "#FFDC00"
+        },
+        {
+            "id": "anhui",
+            "title": "anhui",
+            "subtitle": "This is a subtitle",
+            "description": "Lorem ipsum dolor sit amet, consectetur adipisicing elit. In dicta debitis, esse, deserunt itaque, porro quibusdam iusto excepturi delectus odit consequuntur quas et ipsam. Veniam eligendi reiciendis aliquid sint animi?",
+            "subtitle": "The tallest building in the world",
+            "description": "The Burj Khalifa towers over all. It's almost 200 meters (700 feet) taller than the Shanghai Tower, the world's second tallest building, and nearly twice as tall as the Empire State Building, which once stood as the world's tallest building from 1931 to 1970.",
+            "wikiUrl": "https://en.wikipedia.org/wiki/Burj_Khalifa",
+            "moreImagesUrl": "http://www.bing.com/images/search?q=burj+khalifa&form=HDRSC2&first=1&cw=1063&ch=1290",
+            "stats": {
+              "city": "Dubai",
+              "cost": "USD $1.5 billion",
+              "country": "United Arab Emirates",
+              "floors": 163,
+              "height": {
+                "feet": 2717,
+                "meters": 828
+              },
+              "year": 2010
+            },
+            "fill": "#FF851B"
+        },
+        {
+            "id": "fujian",
+            "title": "fujian",
+            "subtitle": "This is a subtitle",
+            "description": "Lorem ipsum dolor sit amet, consectetur adipisicing elit. In dicta debitis, esse, deserunt itaque, porro quibusdam iusto excepturi delectus odit consequuntur quas et ipsam. Veniam eligendi reiciendis aliquid sint animi?",
+            "subtitle": "The tallest building in the world",
+            "description": "The Burj Khalifa towers over all. It's almost 200 meters (700 feet) taller than the Shanghai Tower, the world's second tallest building, and nearly twice as tall as the Empire State Building, which once stood as the world's tallest building from 1931 to 1970.",
+            "wikiUrl": "https://en.wikipedia.org/wiki/Burj_Khalifa",
+            "moreImagesUrl": "http://www.bing.com/images/search?q=burj+khalifa&form=HDRSC2&first=1&cw=1063&ch=1290",
+            "stats": {
+              "city": "Dubai",
+              "cost": "USD $1.5 billion",
+              "country": "United Arab Emirates",
+              "floors": 163,
+              "height": {
+                "feet": 2717,
+                "meters": 828
+              },
+              "year": 2010
+            },
+            "fill": "#85144b"
+        },
+        {
+            "id": "chongqing",
+            "title": "chongqing",
+            "subtitle": "This is a subtitle",
+            "description": "Lorem ipsum dolor sit amet, consectetur adipisicing elit. In dicta debitis, esse, deserunt itaque, porro quibusdam iusto excepturi delectus odit consequuntur quas et ipsam. Veniam eligendi reiciendis aliquid sint animi?",
+            "subtitle": "The tallest building in the world",
+            "description": "The Burj Khalifa towers over all. It's almost 200 meters (700 feet) taller than the Shanghai Tower, the world's second tallest building, and nearly twice as tall as the Empire State Building, which once stood as the world's tallest building from 1931 to 1970.",
+            "wikiUrl": "https://en.wikipedia.org/wiki/Burj_Khalifa",
+            "moreImagesUrl": "http://www.bing.com/images/search?q=burj+khalifa&form=HDRSC2&first=1&cw=1063&ch=1290",
+            "stats": {
+              "city": "Dubai",
+              "cost": "USD $1.5 billion",
+              "country": "United Arab Emirates",
+              "floors": 163,
+              "height": {
+                "feet": 2717,
+                "meters": 828
+              },
+              "year": 2010
+            },
+            "fill": "green"
+        }
+    ]
+
+}

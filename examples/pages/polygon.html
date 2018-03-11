@@ -114,14 +114,15 @@
 
 // ajax request for region locations
 let getRegionLocations = new Promise((resolve, reject) => {
-    $.getJSON('/data/points/markers.json', (data) => {
+    // $.getJSON('/data/points/markers.json', (data) => {
+    $.getJSON('/data/polygons/polygons.json', (data) => {        
         resolve(data)
     });
 })
 
 // ajax request for region info
 let getRegionInfo = new Promise((resolve, reject) => {
-    $.getJSON('/data/points/info.json', (data) => {
+    $.getJSON('/data/polygons/info.json', (data) => {
         for (let i = 0; i < data.features.length; i++) {
             $('.scrollmap-panes').append(`
                 <section 
@@ -192,12 +193,21 @@ Promise.all(regionPromises)
 
         let myScrollmap = new Scrollmap({
             geojson: regionLocations,
+            geoinfo: regionInfo,
             mapboxToken: 'abc',
             mapboxConfig: {
                 container: 'scrollmap', // container id
                 style: 'mapbox://styles/aosika/cjbepjvcn94182rmrjfnpudra', //stylesheet location
-                center: [100, 30], // starting position (lng, lat),
-                zoom: 3
+            },
+            mapConfig: {
+                center: {
+                    mobile: [120, 30],
+                    desktop: [120, 30]
+                },
+                zoom: {
+                    mobile: 4,
+                    desktop: 4
+                }
             }
         });
 

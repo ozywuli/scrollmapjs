@@ -3835,6 +3835,10 @@ var _config = require('../config');
 
 var _config2 = _interopRequireDefault(_config);
 
+var _getCentroid = require('./utils/getCentroid');
+
+var _getCentroid2 = _interopRequireDefault(_getCentroid);
+
 var _debounce2 = require('lodash/debounce');
 
 var _debounce3 = _interopRequireDefault(_debounce2);
@@ -3853,15 +3857,15 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 // net against concatenated scripts and/or other plugins
 // that are not closed properly.
 // the anonymous function protects the `$` alias from name collisions
-/**
- * Scrollmap.js
- * @author Ozy Wu-Li - @ousikaa
- * @description Scrolling map
- */
+; /**
+   * Scrollmap.js
+   * @author Ozy Wu-Li - @ousikaa
+   * @description Scrolling map
+   */
 
 // https://github.com/jquery-boilerplate/jquery-patterns/blob/master/patterns/jquery.basic.plugin-boilerplate.js
 
-;(function ($, window, document, undefined) {
+(function ($, window, document, undefined) {
     /**
      * Plugin name
      */
@@ -3873,10 +3877,18 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
     var defaultOptions = {
         data: null,
         throttleSpeed: 500,
+
+        /**
+         * Mapbox configuration
+         */
         mapboxConfig: {
             container: 'scrollmap',
             style: 'mapbox://styles/aosika/cj8tmsx9cdk3m2rqmxbq8gr1b'
-        },
+        }, // mapboxConfig
+
+        /**
+         * Map configuration
+         */
         mapConfig: {
             offset: 0,
             center: {
@@ -3887,7 +3899,10 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
                 mobile: 1,
                 desktop: 1
             }
-        },
+        }, // mapConfig
+        /**
+         * Marker configuration
+         */
         markerConfig: {
             color: '#FFF',
             fontSize: '1.6rem',
@@ -3898,7 +3913,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
             images: {
                 default: '/images/map-marker.png',
                 active: '/images/map-marker-active.png'
-            }
+            } // markerConfig
         } // defaultOptions{}
 
 
@@ -3927,6 +3942,9 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
      * Protoype for ScrollMap
      */
     Scrollmap.prototype = {
+        /*------------------------------------*\
+          State
+        \*------------------------------------*/
         map: null,
         activeId: null,
         currentActiveId: null,
@@ -3936,10 +3954,21 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
         mapOffset: null,
         isToggled: false,
 
+        geometryType: null,
+
+        /**
+         * Find geometry type
+         */
+        findGeometryType: function findGeometryType() {
+            this.geometryType = this.options.geojson.features[0].geometry.type.toLowerCase();
+        },
+
+
         /**
          * Init
          */
         init: function init() {
+            this.findGeometryType();
             this.checkScreenSize();
             this.initWindowResizeEvent();
             this.assignDynaMap();
@@ -3947,6 +3976,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
             this.instantiateMap();
             this.initToggleEvent();
         },
+        // init()
 
 
         /**
@@ -3961,6 +3991,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
                 this.options.mapboxConfig.zoom = this.options.mapConfig.zoom.desktop;
             }
         },
+        // assignDynaMap()
 
 
         /**
@@ -3985,6 +4016,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
                 _this.map.on('load', _this.mapLoad.bind(_this, resolve));
             }).then(this.afterMapLoad.bind(this, this.map));
         },
+        // instantiateMap()
 
 
         /**
@@ -3996,10 +4028,23 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
             // Resolve map load promise
             resolve();
 
-            this.options.geojson.features.forEach(function (marker, index) {
-                _this2.generateMarker(marker, index);
-            });
+            // Check if geojson containers either points or polygons
+            if (this.geometryType === "point") {
+                console.log('point');
+                this.options.geojson.features.forEach(function (marker, index) {
+                    _this2.generateMarker(marker, index);
+                });
+            } else if (this.geometryType === "polygon") {
+                console.log('polygon');
+
+                this.options.geojson.features.forEach(function (polygon, index) {
+                    // Find and set the center for each polygon
+                    polygon.geometry.center = (0, _getCentroid2.default)(polygon.geometry.coordinates[0]);
+                    _this2.generatePolygon(polygon, index);
+                });
+            }
         },
+        // mapLoad()
 
 
         /**
@@ -4012,6 +4057,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
             this.addScrollListener();
             this.initMarkerClickEvent();
         },
+        // afterMapLoad()
 
 
         /**
@@ -4032,10 +4078,15 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
                         }
                     }
 
-                    this.highlightActiveMarker(this.activeId);
+                    if (this.geometryType === 'point') {
+                        this.highlightActiveMarker(this.activeId);
+                    } else if (this.geometryType === 'polygon') {
+                        this.highlightActivePolygon(this.activeId);
+                    }
                 }
             }
         },
+        // scrollHandler()
 
 
         /**
@@ -4055,6 +4106,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
             this.map.panTo(defaultOptions.mapboxConfig.center);
             this.currentActiveId = this.activeId = null;
         },
+        // resetScrollmap()
 
 
         /**
@@ -4067,6 +4119,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
                 this.isMobile = true;
             }
         },
+        // checkScreenSize()
 
 
         /**
@@ -4082,6 +4135,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
                 }
             });
         },
+        // initWindowResizeEvent()
 
 
         /**
@@ -4094,6 +4148,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
             this.mapOffset = parseInt(height);
         },
+        // getMapHeight()
 
 
         /**
@@ -4130,9 +4185,36 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
                 });
             }
 
-            // keep track of the activeId so that users don't fire `highlightActiveMarker` if a marker is already highlighted
+            // keep track of the activeId so that users won't fire `highlightActiveMarker` if a marker is already highlighted
             this.currentActiveId = activeId;
         },
+        // highlightActiveMarker
+
+
+        /**
+         * Highlight active polygon
+         */
+        highlightActivePolygon: function highlightActivePolygon(activeId) {
+            var _this5 = this;
+
+            // if marker is already highlighted, don't highlight it again
+            if (this.currentActiveId !== activeId) {
+                // console.log(this.currentActiveId);
+                // Find the geoinfo item based on the corresponding polygon id
+                (0, _find3.default)(this.options.geojson.features, function (item) {
+                    _this5.map.setPaintProperty(item.properties.name.toLowerCase(), 'fill-opacity', 0.1);
+                    if (_this5.activeId === item.properties.name.toLowerCase()) {
+                        console.log(item);
+                        _this5.map.setPaintProperty(_this5.activeId, 'fill-opacity', 1);
+                        _this5.panHandler(item.geometry.center);
+                    }
+                });
+            }
+
+            // keep track of the activeId so that users won't fire `highlightActivePolygon` if a polygon is already highlighted
+            this.currentActiveId = activeId;
+        },
+        // highlightActivePolygon
 
 
         /**
@@ -4143,6 +4225,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
             // window.addEventListener('scroll', _debounce(this.scrollHandler.bind(this), this.options.debounceSpeed), true);
             window.addEventListener('scroll', (0, _throttle3.default)(this.scrollHandler.bind(this), this.options.throttleSpeed), true);
         },
+        // addScrollListener
 
 
         /**
@@ -4151,7 +4234,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
         panHandler: function panHandler(coords) {
             this.map.panTo(coords);
         },
-
+        // panHandler()
 
         /**
          * Checks if element is on screen
@@ -4170,7 +4253,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
             return elPos;
         },
-
+        // isElementOnScreen
 
         /**
          * Generate a map marker
@@ -4215,32 +4298,65 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
                 offset: [-parseInt(this.options.markerConfig.dimensions.width) / 10, -parseInt(this.options.markerConfig.dimensions.height) / 2]
             }).setLngLat(marker.geometry.coordinates).addTo(this.map);
         },
-
+        // generateMarker()
 
         /**
          * Initialize marker click event
          */
         initMarkerClickEvent: function initMarkerClickEvent() {
-            var _this5 = this;
+            var _this6 = this;
 
             $('#scrollmap').on('click', '.marker', function (event) {
-                if (_this5.isToggled) {
-                    _this5.toggleMap();
+                if (_this6.isToggled) {
+                    _this6.toggleMap();
                     window.setTimeout(function () {
-                        _this5.scrollMap(event);
+                        _this6.scrollMap(event);
                     }, 200);
                 } else {
-                    _this5.scrollMap(event);
+                    _this6.scrollMap(event);
                 }
             });
         },
+        // initMarkerClickEvent()
 
+
+        /**
+         * Generate Polygons
+         */
+        generatePolygon: function generatePolygon(polygon, index) {
+            // console.log(polygon);
+
+            // Holds the polygon fill
+            var fill = void 0;
+
+            // Find the geoinfo item based on the corresponding polygon id
+            (0, _find3.default)(this.options.geoinfo.features, function (item) {
+                if (item.id === polygon.properties.name.toLowerCase()) {
+                    fill = item.fill;
+                }
+            });
+
+            // add each polygon to the map
+            this.map.addLayer({
+                'id': polygon.properties.name.toLowerCase(),
+                'type': 'fill',
+                'source': {
+                    'type': 'geojson',
+                    'data': polygon
+                },
+                'paint': {
+                    'fill-color': fill,
+                    'fill-opacity': 0.1
+                }
+            }, 'water');
+        },
+        // generatePolygon()
 
         /**
          * Scroll the map
          */
         scrollMap: function scrollMap(event) {
-            var _this6 = this;
+            var _this7 = this;
 
             // get target ID
             var thisMarkerId = event.currentTarget.dataset.id;
@@ -4249,7 +4365,11 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
             this.activeId = thisMarkerId;
 
             // highlight marker based on active marker ID
-            this.highlightActiveMarker(this.activeId);
+            if (this.geometryType === 'point') {
+                this.highlightActiveMarker(this.activeId);
+            } else if (this.geometryType === 'polygon') {
+                this.highlightActivePolygon(this.activeId);
+            }
 
             // set the offset for the scroll to pane
             var offset = $('.scrollmap-pane[data-id=' + thisMarkerId + ']')[0].offsetTop - 24;
@@ -4262,9 +4382,10 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
                 scrollTop: offset
             }, function () {
                 // Notify that scrolling has been completed
-                _this6.isScrolling = false;
+                _this7.isScrolling = false;
             });
         },
+        // scrollmap()
 
 
         /**
@@ -4274,6 +4395,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
             $('.scrollmap__toggle-map').on('click', this.toggleMap.bind(this));
         },
         // initToggleEvent()
+
 
         /**
          * Toggles the map
@@ -4308,5 +4430,36 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
     module.exports = Scrollmap;
 })(jQuery, window, document);
 
-},{"../config":1,"lodash/debounce":98,"lodash/find":100,"lodash/throttle":121}]},{},[126])(126)
+},{"../config":1,"./utils/getCentroid":127,"lodash/debounce":98,"lodash/find":100,"lodash/throttle":121}],127:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+exports.default = function (arr) {
+    var twoTimesSignedArea = 0;
+    var cxTimes6SignedArea = 0;
+    var cyTimes6SignedArea = 0;
+
+    var length = arr.length;
+
+    var x = function x(i) {
+        return arr[i % length][0];
+    };
+    var y = function y(i) {
+        return arr[i % length][1];
+    };
+
+    for (var i = 0; i < arr.length; i++) {
+        var twoSA = x(i) * y(i + 1) - x(i + 1) * y(i);
+        twoTimesSignedArea += twoSA;
+        cxTimes6SignedArea += (x(i) + x(i + 1)) * twoSA;
+        cyTimes6SignedArea += (y(i) + y(i + 1)) * twoSA;
+    }
+    var sixSignedArea = 3 * twoTimesSignedArea;
+    return [cxTimes6SignedArea / sixSignedArea, cyTimes6SignedArea / sixSignedArea];
+};
+
+},{}]},{},[126])(126)
 });

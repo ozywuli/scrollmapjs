@@ -7,6 +7,7 @@
 // https://github.com/jquery-boilerplate/jquery-patterns/blob/master/patterns/jquery.basic.plugin-boilerplate.js
 
 import config from '../config';
+import getCentroid from './utils/getCentroid';
 import _debounce from 'lodash/debounce';
 import _throttle from 'lodash/throttle';
 import _find from 'lodash/find';
@@ -29,10 +30,18 @@ import _find from 'lodash/find';
     let defaultOptions = {
         data: null,
         throttleSpeed: 500,
+
+        /**
+         * Mapbox configuration
+         */
         mapboxConfig: {
             container: 'scrollmap',
             style: 'mapbox://styles/aosika/cj8tmsx9cdk3m2rqmxbq8gr1b'
-        },
+        }, // mapboxConfig
+
+        /**
+         * Map configuration
+         */
         mapConfig: {
             offset: 0,
             center: {
@@ -43,7 +52,10 @@ import _find from 'lodash/find';
                 mobile: 1,
                 desktop: 1
             }
-        },
+        }, // mapConfig
+        /**
+         * Marker configuration
+         */
         markerConfig: {
             color: '#FFF',
             fontSize: '1.6rem',
@@ -55,7 +67,7 @@ import _find from 'lodash/find';
                 default: '/images/map-marker.png',
                 active: '/images/map-marker-active.png'
             }
-        }
+        } // markerConfig
     } // defaultOptions{}
 
 
@@ -85,6 +97,9 @@ import _find from 'lodash/find';
      * Protoype for ScrollMap
      */
     Scrollmap.prototype = {
+        /*------------------------------------*\
+          State
+        \*------------------------------------*/
         map: null,
         activeId: null,
         currentActiveId: null,
@@ -94,17 +109,28 @@ import _find from 'lodash/find';
         mapOffset: null,
         isToggled: false,
 
+        geometryType: null,
+
+        /**
+         * Find geometry type
+         */
+        findGeometryType() {
+            this.geometryType = this.options.geojson.features[0].geometry.type.toLowerCase();
+        },
+
         /**
          * Init
          */
         init() {
+            this.findGeometryType();
             this.checkScreenSize();
             this.initWindowResizeEvent();
             this.assignDynaMap();
             this.getMapHeight();
             this.instantiateMap();
             this.initToggleEvent();
-        },
+        }, // init()
+
 
         /**
          * Assign initial center position
@@ -117,7 +143,8 @@ import _find from 'lodash/find';
                 this.options.mapboxConfig.center = this.options.mapConfig.center.desktop;
                 this.options.mapboxConfig.zoom = this.options.mapConfig.zoom.desktop;
             }
-        },
+        }, // assignDynaMap()
+
 
         /**
          * Instantiate the map
@@ -139,7 +166,8 @@ import _find from 'lodash/find';
                 this.map.on('load', this.mapLoad.bind(this, resolve));
             }).then(this.afterMapLoad.bind(this, this.map));
 
-        },
+        }, // instantiateMap()
+
 
         /**
          * When map is loaded
@@ -148,10 +176,23 @@ import _find from 'lodash/find';
             // Resolve map load promise
             resolve();
 
-            this.options.geojson.features.forEach((marker, index) => {
-                this.generateMarker(marker, index);
-            })
-        },
+            // Check if geojson containers either points or polygons
+            if (this.geometryType === "point") {
+                console.log('point');
+                this.options.geojson.features.forEach((marker, index) => {
+                    this.generateMarker(marker, index);
+                })
+            } else if (this.geometryType === "polygon") {
+                console.log('polygon');
+
+                this.options.geojson.features.forEach((polygon, index) => {
+                    // Find and set the center for each polygon
+                    polygon.geometry.center = getCentroid(polygon.geometry.coordinates[0]);
+                    this.generatePolygon(polygon, index)
+                })
+            }
+        }, // mapLoad()
+
 
         /**
          * After map is loaded
@@ -162,7 +203,8 @@ import _find from 'lodash/find';
             this.scrollHandler();
             this.addScrollListener();
             this.initMarkerClickEvent();
-        },
+        }, // afterMapLoad()
+
 
         /**
          * Handles the scroll event
@@ -182,10 +224,15 @@ import _find from 'lodash/find';
                         }
                     }
 
-                    this.highlightActiveMarker(this.activeId);
+                    if (this.geometryType === 'point') {
+                        this.highlightActiveMarker(this.activeId);    
+                    } else if (this.geometryType === 'polygon') {
+                        this.highlightActivePolygon(this.activeId);
+                    }
                 }
             }
-        },
+        }, // scrollHandler()
+
 
         /**
          * Reset scrollmap
@@ -203,7 +250,8 @@ import _find from 'lodash/find';
             this.map.setZoom(defaultOptions.mapboxConfig.zoom);
             this.map.panTo(defaultOptions.mapboxConfig.center);
             this.currentActiveId = this.activeId = null;
-        },
+        }, // resetScrollmap()
+
 
         /**
          * Check device screen size
@@ -214,7 +262,7 @@ import _find from 'lodash/find';
             } else {
                 this.isMobile = true;
             }
-        },
+        }, // checkScreenSize()
 
 
         /**
@@ -227,7 +275,8 @@ import _find from 'lodash/find';
                     this.toggleMap()
                 }
             });
-        },
+        }, // initWindowResizeEvent()
+
 
         /**
          * Get the height of the map
@@ -238,7 +287,8 @@ import _find from 'lodash/find';
             let height = scrollmapElStyle.getPropertyValue('height');
             
             this.mapOffset = parseInt(height);
-        },
+        }, // getMapHeight()
+
 
         /**
          * Highlight active marker
@@ -272,9 +322,33 @@ import _find from 'lodash/find';
                 });
             }
 
-            // keep track of the activeId so that users don't fire `highlightActiveMarker` if a marker is already highlighted
+            // keep track of the activeId so that users won't fire `highlightActiveMarker` if a marker is already highlighted
             this.currentActiveId = activeId;
-        },
+        }, // highlightActiveMarker
+
+
+        /**
+         * Highlight active polygon
+         */
+        highlightActivePolygon(activeId) {
+            // if marker is already highlighted, don't highlight it again
+            if (this.currentActiveId !== activeId) {
+                // console.log(this.currentActiveId);
+                // Find the geoinfo item based on the corresponding polygon id
+                _find(this.options.geojson.features, (item) => {
+                    this.map.setPaintProperty(item.properties.name.toLowerCase(), 'fill-opacity', 0.1);
+                    if (this.activeId === item.properties.name.toLowerCase()) {
+                        console.log(item);
+                        this.map.setPaintProperty(this.activeId, 'fill-opacity', 1);
+                        this.panHandler(item.geometry.center);
+                    }
+                });
+            }
+
+            // keep track of the activeId so that users won't fire `highlightActivePolygon` if a polygon is already highlighted
+            this.currentActiveId = activeId;
+        }, // highlightActivePolygon
+
 
         /**
          * Add scroll event listener
@@ -283,7 +357,7 @@ import _find from 'lodash/find';
             // console.log('add scroll listener');
             // window.addEventListener('scroll', _debounce(this.scrollHandler.bind(this), this.options.debounceSpeed), true);
             window.addEventListener('scroll', _throttle(this.scrollHandler.bind(this), this.options.throttleSpeed), true);
-        },
+        }, // addScrollListener
 
 
         /**
@@ -291,7 +365,7 @@ import _find from 'lodash/find';
          */
         panHandler(coords) {
             this.map.panTo(coords);
-        },
+        }, // panHandler()
 
         /**
          * Checks if element is on screen
@@ -313,7 +387,7 @@ import _find from 'lodash/find';
             // console.log(elPos);
 
             return elPos;
-        },
+        }, // isElementOnScreen
 
         /**
          * Generate a map marker
@@ -360,7 +434,7 @@ import _find from 'lodash/find';
             })
                 .setLngLat(marker.geometry.coordinates)
                 .addTo(this.map);
-        },
+        }, // generateMarker()
 
         /**
          * Initialize marker click event
@@ -376,7 +450,39 @@ import _find from 'lodash/find';
                     this.scrollMap(event);
                 }
             })
-        },
+        }, // initMarkerClickEvent()
+
+
+        /**
+         * Generate Polygons
+         */
+        generatePolygon(polygon, index) {
+            // console.log(polygon);
+
+            // Holds the polygon fill
+            let fill;
+
+            // Find the geoinfo item based on the corresponding polygon id
+            _find(this.options.geoinfo.features, (item) => {
+                if (item.id === polygon.properties.name.toLowerCase()) {
+                    fill = item.fill;
+                }
+            });
+
+            // add each polygon to the map
+            this.map.addLayer({
+                'id': polygon.properties.name.toLowerCase(),
+                'type': 'fill',
+                'source': {
+                    'type': 'geojson',
+                    'data': polygon
+                },
+                'paint': {
+                    'fill-color': fill,
+                    'fill-opacity': 0.1
+                },
+            }, 'water');
+        }, // generatePolygon()
 
         /**
          * Scroll the map
@@ -389,8 +495,12 @@ import _find from 'lodash/find';
             this.activeId = thisMarkerId;
 
             // highlight marker based on active marker ID
-            this.highlightActiveMarker(this.activeId);    
-            
+            if (this.geometryType === 'point') {
+                this.highlightActiveMarker(this.activeId);    
+            } else if (this.geometryType === 'polygon') {
+                this.highlightActivePolygon(this.activeId);
+            }
+
             // set the offset for the scroll to pane
             let offset = $(`.scrollmap-pane[data-id=${thisMarkerId}]`)[0].offsetTop - 24;
 
@@ -404,7 +514,8 @@ import _find from 'lodash/find';
                 // Notify that scrolling has been completed
                 this.isScrolling = false;
             });
-        },
+        }, // scrollmap()
+
 
         /**
          * Initialize map toggle event
@@ -412,6 +523,7 @@ import _find from 'lodash/find';
         initToggleEvent() {
             $('.scrollmap__toggle-map').on('click', this.toggleMap.bind(this));
         }, // initToggleEvent()
+
 
         /**
          * Toggles the map
