@@ -238,13 +238,19 @@ import _find from 'lodash/find';
          * Reset scrollmap
          */
         resetScrollmap() {
-            let markerImgEl = document.querySelectorAll('.marker-img');
-            let markerEl = document.querySelectorAll('.marker');
+            if (this.geometryType === 'point') {
+                let markerImgEl = document.querySelectorAll('.marker-img');
+                let markerEl = document.querySelectorAll('.marker');
 
-            for (let i = 0; i < markerImgEl.length; i++) {
-                markerImgEl[i].style.opacity = 0.5;
-                markerImgEl[i].style.backgroundImage = `url(${this.options.markerConfig.images.default})`;
-                markerEl[i].style.zIndex = 10 - i;
+                for (let i = 0; i < markerImgEl.length; i++) {
+                    markerImgEl[i].style.opacity = 0.5;
+                    markerImgEl[i].style.backgroundImage = `url(${this.options.markerConfig.images.default})`;
+                    markerEl[i].style.zIndex = 10 - i;
+                }
+            } else if (this.geometryType === 'polygon') {
+                this.options.geojson.features.forEach((polygon, index) => {
+                    this.map.setPaintProperty(polygon.properties.name.toLowerCase(), 'fill-opacity', 0.1);
+                })
             }
 
             this.map.setZoom(defaultOptions.mapboxConfig.zoom);
@@ -338,7 +344,6 @@ import _find from 'lodash/find';
                 _find(this.options.geojson.features, (item) => {
                     this.map.setPaintProperty(item.properties.name.toLowerCase(), 'fill-opacity', 0.1);
                     if (this.activeId === item.properties.name.toLowerCase()) {
-                        console.log(item);
                         this.map.setPaintProperty(this.activeId, 'fill-opacity', 1);
                         this.panHandler(item.geometry.center);
                     }
@@ -482,6 +487,7 @@ import _find from 'lodash/find';
                     'fill-opacity': 0.1
                 },
             }, 'water');
+
         }, // generatePolygon()
 
         /**

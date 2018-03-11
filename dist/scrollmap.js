@@ -4093,13 +4093,21 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
          * Reset scrollmap
          */
         resetScrollmap: function resetScrollmap() {
-            var markerImgEl = document.querySelectorAll('.marker-img');
-            var markerEl = document.querySelectorAll('.marker');
+            var _this3 = this;
 
-            for (var i = 0; i < markerImgEl.length; i++) {
-                markerImgEl[i].style.opacity = 0.5;
-                markerImgEl[i].style.backgroundImage = 'url(' + this.options.markerConfig.images.default + ')';
-                markerEl[i].style.zIndex = 10 - i;
+            if (this.geometryType === 'point') {
+                var markerImgEl = document.querySelectorAll('.marker-img');
+                var markerEl = document.querySelectorAll('.marker');
+
+                for (var i = 0; i < markerImgEl.length; i++) {
+                    markerImgEl[i].style.opacity = 0.5;
+                    markerImgEl[i].style.backgroundImage = 'url(' + this.options.markerConfig.images.default + ')';
+                    markerEl[i].style.zIndex = 10 - i;
+                }
+            } else if (this.geometryType === 'polygon') {
+                this.options.geojson.features.forEach(function (polygon, index) {
+                    _this3.map.setPaintProperty(polygon.properties.name.toLowerCase(), 'fill-opacity', 0.1);
+                });
             }
 
             this.map.setZoom(defaultOptions.mapboxConfig.zoom);
@@ -4126,12 +4134,12 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
          * Initialize window resize event
          */
         initWindowResizeEvent: function initWindowResizeEvent() {
-            var _this3 = this;
+            var _this4 = this;
 
             $(window).on('resize.scrollmap', function () {
-                _this3.checkScreenSize();
-                if (_this3.isToggled) {
-                    _this3.toggleMap();
+                _this4.checkScreenSize();
+                if (_this4.isToggled) {
+                    _this4.toggleMap();
                 }
             });
         },
@@ -4155,7 +4163,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
          * Highlight active marker
          */
         highlightActiveMarker: function highlightActiveMarker(activeId) {
-            var _this4 = this;
+            var _this5 = this;
 
             // if marker is already highlighted, don't highlight it again
             if (this.currentActiveId !== activeId) {
@@ -4180,7 +4188,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
                 (0, _find3.default)(this.options.geojson.features, function (item) {
                     if (item.properties.id === activeId) {
-                        _this4.panHandler(item.geometry.coordinates);
+                        _this5.panHandler(item.geometry.coordinates);
                     }
                 });
             }
@@ -4195,18 +4203,17 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
          * Highlight active polygon
          */
         highlightActivePolygon: function highlightActivePolygon(activeId) {
-            var _this5 = this;
+            var _this6 = this;
 
             // if marker is already highlighted, don't highlight it again
             if (this.currentActiveId !== activeId) {
                 // console.log(this.currentActiveId);
                 // Find the geoinfo item based on the corresponding polygon id
                 (0, _find3.default)(this.options.geojson.features, function (item) {
-                    _this5.map.setPaintProperty(item.properties.name.toLowerCase(), 'fill-opacity', 0.1);
-                    if (_this5.activeId === item.properties.name.toLowerCase()) {
-                        console.log(item);
-                        _this5.map.setPaintProperty(_this5.activeId, 'fill-opacity', 1);
-                        _this5.panHandler(item.geometry.center);
+                    _this6.map.setPaintProperty(item.properties.name.toLowerCase(), 'fill-opacity', 0.1);
+                    if (_this6.activeId === item.properties.name.toLowerCase()) {
+                        _this6.map.setPaintProperty(_this6.activeId, 'fill-opacity', 1);
+                        _this6.panHandler(item.geometry.center);
                     }
                 });
             }
@@ -4304,16 +4311,16 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
          * Initialize marker click event
          */
         initMarkerClickEvent: function initMarkerClickEvent() {
-            var _this6 = this;
+            var _this7 = this;
 
             $('#scrollmap').on('click', '.marker', function (event) {
-                if (_this6.isToggled) {
-                    _this6.toggleMap();
+                if (_this7.isToggled) {
+                    _this7.toggleMap();
                     window.setTimeout(function () {
-                        _this6.scrollMap(event);
+                        _this7.scrollMap(event);
                     }, 200);
                 } else {
-                    _this6.scrollMap(event);
+                    _this7.scrollMap(event);
                 }
             });
         },
@@ -4356,7 +4363,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
          * Scroll the map
          */
         scrollMap: function scrollMap(event) {
-            var _this7 = this;
+            var _this8 = this;
 
             // get target ID
             var thisMarkerId = event.currentTarget.dataset.id;
@@ -4382,7 +4389,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
                 scrollTop: offset
             }, function () {
                 // Notify that scrolling has been completed
-                _this7.isScrolling = false;
+                _this8.isScrolling = false;
             });
         },
         // scrollmap()
