@@ -115,14 +115,14 @@
 // ajax request for region locations
 let getRegionLocations = new Promise((resolve, reject) => {
     // $.getJSON('/data/points/markers.json', (data) => {
-    $.getJSON('/data/polygons/polygons.json', (data) => {        
+    $.getJSON('/data/multipolygon/multipolygon.json', (data) => {        
         resolve(data)
     });
 })
 
 // ajax request for region info
 let getRegionInfo = new Promise((resolve, reject) => {
-    $.getJSON('/data/polygons/info.json', (data) => {
+    $.getJSON('/data/multipolygon/info.json', (data) => {
         for (let i = 0; i < data.length; i++) {
             $('.scrollmap-panes').append(`
                 <section 
@@ -176,7 +176,8 @@ let getRegionInfo = new Promise((resolve, reject) => {
         }
         resolve(data)
     });
-})
+});
+
 
 // store the promises
 let regionPromises = [
@@ -197,16 +198,16 @@ Promise.all(regionPromises)
             mapboxToken: 'abc',
             mapboxConfig: {
                 container: 'scrollmap', // container id
-                style: 'mapbox://styles/aosika/cjbepjvcn94182rmrjfnpudra', //stylesheet location
+                style: 'mapbox://styles/aosika/cjeooa4do500e2rn5sbqhdike', //stylesheet location
             },
             mapConfig: {
                 center: {
-                    mobile: [120, 30],
-                    desktop: [120, 30]
+                    mobile: [0, 0],
+                    desktop: [60, 30]
                 },
                 zoom: {
-                    mobile: 4,
-                    desktop: 4
+                    mobile: 2,
+                    desktop: 2
                 }
             }
         });

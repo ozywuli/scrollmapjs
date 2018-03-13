@@ -11,6 +11,7 @@ import getCentroid from './utils/getCentroid';
 import _debounce from 'lodash/debounce';
 import _throttle from 'lodash/throttle';
 import _find from 'lodash/find';
+import _findIndex from 'lodash/findIndex';
 
 
 // the semi-colon before the function invocation is a safety
@@ -28,6 +29,8 @@ import _find from 'lodash/find';
      * Default Options
      */
     let defaultOptions = {
+        geojson: null,
+        geoinfo: null,
         data: null,
         throttleSpeed: 500,
 
@@ -67,7 +70,13 @@ import _find from 'lodash/find';
                 default: '/images/map-marker.png',
                 active: '/images/map-marker-active.png'
             }
-        } // markerConfig
+        }, // markerConfig
+        /**
+         * Polygon Config
+         */
+        polygonConfig: {
+            fill: '#009bc2'
+        } // polygonConfig
     } // defaultOptions{}
 
 
@@ -108,15 +117,8 @@ import _find from 'lodash/find';
         isMobile: true,
         mapOffset: null,
         isToggled: false,
-
         geometryType: null,
 
-        /**
-         * Find geometry type
-         */
-        findGeometryType() {
-            this.geometryType = this.options.geojson.features[0].geometry.type.toLowerCase();
-        },
 
         /**
          * Init
@@ -130,6 +132,14 @@ import _find from 'lodash/find';
             this.instantiateMap();
             this.initToggleEvent();
         }, // init()
+
+
+        /**
+         * Find geometry type
+         */
+        findGeometryType() {
+            this.geometryType = this.options.geojson.features[0].geometry.type.replace(/\s+/g, '-').toLowerCase();
+        }, // findGeometryType()
 
 
         /**
@@ -179,17 +189,24 @@ import _find from 'lodash/find';
 
             // Check if geojson containers either points or polygons
             if (this.geometryType === "point") {
-                console.log('point');
+                // Add markers to map
                 this.options.geojson.features.forEach((marker, index) => {
                     this.generateMarker(marker, index);
                 })
-            } else if (this.geometryType === "polygon") {
-                console.log('polygon');
+                // Add marker click event
+                this.initMarkerClickEvent();
+            } else if (this.geometryType === "polygon" || this.geometryType === "multipolygon") {
                 this.options.geojson.features.forEach((polygon, index) => {
-                    // Find and set the center for each polygon
-                    polygon.geometry.center = getCentroid(polygon.geometry.coordinates[0]);
+                    // Find and set the center for each polygon (doesn't work with multipolygons)
+                    if (this.geometryType === "polygon") {
+                        polygon.geometry.center = getCentroid(polygon.geometry.coordinates[0]);
+                    }
+                    // generate polygons
                     this.generatePolygon(polygon, index);
+                    // add polygon click event
                     this.initPolygonClickEvent(polygon, index);
+                    // generate polygon number labels
+                    this.generateNumberLabel( polygon, _findIndex(this.options.geoinfo, {'id': polygon.properties.name.replace(/\s+/g, '-').replace(/\s+/g, '-').toLowerCase()}) );
                 })
             }
         }, // mapLoad()
@@ -203,10 +220,6 @@ import _find from 'lodash/find';
             // trigger scroll after map finishes loading
             this.scrollHandler();
             this.addScrollListener();
-
-            if (this.geometryType === "point") {
-                this.initMarkerClickEvent();
-            }
         }, // afterMapLoad()
 
 
@@ -214,9 +227,9 @@ import _find from 'lodash/find';
          * Handles the scroll event
          */
         scrollHandler() {
-            // console.log('throttling');
             if (!this.isScrolling) {
                 if (!this.isToggled) {
+                    // 
                     for (let i = 0; i < this.options.geojson.features.length; i++) {
                         let paneEl = document.querySelectorAll('.scrollmap-pane')[i];
                         if (this.isElementOnScreen(paneEl)) {
@@ -230,7 +243,7 @@ import _find from 'lodash/find';
 
                     if (this.geometryType === 'point') {
                         this.highlightActiveMarker(this.activeId);    
-                    } else if (this.geometryType === 'polygon') {
+                    } else if (this.geometryType === "polygon" || this.geometryType === "multipolygon") {
                         this.highlightActivePolygon(this.activeId);
                     }
                 }
@@ -251,9 +264,9 @@ import _find from 'lodash/find';
                     markerImgEl[i].style.backgroundImage = `url(${this.options.markerConfig.images.default})`;
                     markerEl[i].style.zIndex = 10 - i;
                 }
-            } else if (this.geometryType === 'polygon') {
+            } else if (this.geometryType === "polygon" || this.geometryType === "multipolygon") {
                 this.options.geojson.features.forEach((polygon, index) => {
-                    this.map.setPaintProperty(polygon.properties.name.toLowerCase(), 'fill-opacity', 0.1);
+                    this.map.setPaintProperty(polygon.properties.name.replace(/\s+/g, '-').replace(/\s+/g, '-').toLowerCase(), 'fill-opacity', 0.1);
                 })
             }
 
@@ -346,8 +359,8 @@ import _find from 'lodash/find';
                 // console.log(this.currentActiveId);
                 // Find the geoinfo item based on the corresponding polygon id
                 _find(this.options.geojson.features, (item) => {
-                    this.map.setPaintProperty(item.properties.name.toLowerCase(), 'fill-opacity', 0.1);
-                    if (this.activeId === item.properties.name.toLowerCase()) {
+                    this.map.setPaintProperty(item.properties.name.replace(/\s+/g, '-').toLowerCase(), 'fill-opacity', 0.1);
+                    if (this.activeId === item.properties.name.replace(/\s+/g, '-').toLowerCase()) {
                         this.map.setPaintProperty(this.activeId, 'fill-opacity', 1);
                         this.panHandler(item.geometry.center);
                     }
@@ -363,8 +376,6 @@ import _find from 'lodash/find';
          * Add scroll event listener
          */
         addScrollListener() {
-            // console.log('add scroll listener');
-            // window.addEventListener('scroll', _debounce(this.scrollHandler.bind(this), this.options.debounceSpeed), true);
             window.addEventListener('scroll', _throttle(this.scrollHandler.bind(this), this.options.throttleSpeed), true);
         }, // addScrollListener
 
@@ -393,8 +404,6 @@ import _find from 'lodash/find';
                     (bounds.bottom - this.options.mapConfig.offset > 0);
             }
 
-            // console.log(elPos);
-
             return elPos;
         }, // isElementOnScreen
 
@@ -405,34 +414,34 @@ import _find from 'lodash/find';
             // console.log('generate marker');
             // Make marker element
             let markerEl = document.createElement('div');
-            markerEl.className = 'marker';
-            markerEl.style.width = this.options.markerConfig.dimensions.width;
-            markerEl.style.height = this.options.markerConfig.dimensions.height;
-            markerEl.style.zIndex = 10 - index;
-            markerEl.dataset.id = marker.properties.id;
+                markerEl.className = 'marker';
+                markerEl.style.width = this.options.markerConfig.dimensions.width;
+                markerEl.style.height = this.options.markerConfig.dimensions.height;
+                markerEl.style.zIndex = 10 - index;
+                markerEl.dataset.id = marker.properties.id;
 
             // Make marker image
             let markerBgEl = markerEl.appendChild(document.createElement('div'));
-            markerBgEl.className = 'marker-img';
-            markerBgEl.style.position = 'absolute';
-            markerBgEl.style.width = '100%';
-            markerBgEl.style.height = '100%';
-            markerBgEl.dataset.id = marker.properties.id;
+                markerBgEl.className = 'marker-img';
+                markerBgEl.style.position = 'absolute';
+                markerBgEl.style.width = '100%';
+                markerBgEl.style.height = '100%';
+                markerBgEl.dataset.id = marker.properties.id;
 
             
             // Make marker number
             let markerElNumberEl = markerEl.appendChild(document.createElement('div'));
-            markerElNumberEl.style.position = 'relative';
-            markerElNumberEl.style.top = `-${parseFloat(this.options.markerConfig.fontSize) / 4}rem`;
-            markerElNumberEl.style.color = this.options.markerConfig.color;
-            markerElNumberEl.style.display = 'flex';
-            markerElNumberEl.style.alignItems = 'center';
-            markerElNumberEl.style.justifyContent = 'center';
-            markerElNumberEl.style.width = '100%';
-            markerElNumberEl.style.height = '100%';
-            markerElNumberEl.style.zIndex = '1';
-            markerElNumberEl.style.fontSize = this.options.markerConfig.fontSize;
-            markerElNumberEl.dataset.id = marker.properties.id;
+                markerElNumberEl.style.position = 'relative';
+                markerElNumberEl.style.top = `-${parseFloat(this.options.markerConfig.fontSize) / 4}rem`;
+                markerElNumberEl.style.color = this.options.markerConfig.color;
+                markerElNumberEl.style.display = 'flex';
+                markerElNumberEl.style.alignItems = 'center';
+                markerElNumberEl.style.justifyContent = 'center';
+                markerElNumberEl.style.width = '100%';
+                markerElNumberEl.style.height = '100%';
+                markerElNumberEl.style.zIndex = '1';
+                markerElNumberEl.style.fontSize = this.options.markerConfig.fontSize;
+                markerElNumberEl.dataset.id = marker.properties.id;
             let markerElNumberText = document.createTextNode(index + 1);
 
             markerElNumberEl.appendChild(markerElNumberText);
@@ -461,6 +470,23 @@ import _find from 'lodash/find';
             })
         }, // initMarkerClickEvent()
 
+        generateNumberLabel(polygon, index) {
+            let markerEl = document.createElement('div');
+                markerEl.className = 'marker';
+
+            let markerElWrapper = document.createElement('div');
+                markerEl.appendChild(markerElWrapper)
+                markerElWrapper.className = 'marker-wrapper';
+                markerElWrapper.style.color = '#FFF';
+
+            let markerElNumberText = document.createTextNode(index + 1);
+                markerElWrapper.appendChild(markerElNumberText);
+
+            // Marker config
+            let markerInstance = new mapboxgl.Marker(markerEl)
+                .setLngLat(polygon.geometry.center)
+                .addTo(this.map);
+        },
 
         /**
          * Generate Polygons
@@ -469,18 +495,22 @@ import _find from 'lodash/find';
             // console.log(polygon);
 
             // Holds the polygon fill
-            let fill;
+            let fill = this.options.polygonConfig.fill;
 
             // Find the geoinfo item based on the corresponding polygon id
-            _find(this.options.geoinfo.features, (item) => {
-                if (item.id === polygon.properties.name.toLowerCase()) {
-                    fill = item.fill;
-                }
-            });
+            if (this.options.geoinfo) {
+                _find(this.options.geoinfo.features, (item) => {
+                    if (item.fill) {
+                        if (item.id === polygon.properties.name.replace(/\s+/g, '-').toLowerCase()) {
+                            fill = item.fill;
+                        }
+                    }
+                });
+            }
 
             // add each polygon to the map
             this.map.addLayer({
-                'id': polygon.properties.name.toLowerCase(),
+                'id': polygon.properties.name.replace(/\s+/g, '-').toLowerCase(),
                 'type': 'fill',
                 'source': {
                     'type': 'geojson',
@@ -498,7 +528,7 @@ import _find from 'lodash/find';
          * Initialize polygon click event
          */
         initPolygonClickEvent(polygon, index) {
-            this.map.on('click', polygon.properties.name.toLowerCase(), (event) => {
+            this.map.on('click', polygon.properties.name.replace(/\s+/g, '-').toLowerCase(), (event) => {
                 if (this.isToggled) {
                     this.toggleMap()
                     window.setTimeout(() => {
@@ -522,14 +552,14 @@ import _find from 'lodash/find';
                 this.activeId = thisMarkerId;
                 // highlight marker based on active marker ID
                 this.highlightActiveMarker(this.activeId);    
-            } else if (this.geometryType === 'polygon') {
+            } else if (this.geometryType === "polygon" || this.geometryType === "multipolygon") {
                 let thisPolygonId = event.features[0].layer.id;
                 this.activeId = thisPolygonId;
                 this.highlightActivePolygon(this.activeId);
             }
 
             // set the offset for the scroll to pane
-            let offset = $(`.scrollmap-pane[data-id=${this.activeId}]`)[0].offsetTop - 24;
+            let offset = $(`.scrollmap-pane[data-id="${this.activeId}"]`)[0].offsetTop - 24;
 
             // Notify that scrolling has been initiated
             this.isScrolling = true;

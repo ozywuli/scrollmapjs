@@ -122,19 +122,19 @@ let getRegionLocations = new Promise((resolve, reject) => {
 // ajax request for region info
 let getRegionInfo = new Promise((resolve, reject) => {
     $.getJSON('/data/points/info.json', (data) => {
-        for (let i = 0; i < data.features.length; i++) {
+        for (let i = 0; i < data.length; i++) {
             $('.scrollmap-panes').append(`
                 <section 
                     class="scrollmap-pane"
-                    data-id="${data.features[i].id}"
+                    data-id="${data[i].id}"
                 >
                     <div class="scrollmap-pane__container">
                         <header class="scrollmap-pane__head">
                             <h2 class="scrollmap-pane__title">
-                                ${data.features[i].title}
+                                ${data[i].title}
                             </h2>
                             <h3 class="scrollmap-pane__subtitle">
-                                ${data.features[i].subtitle}
+                                ${data[i].subtitle}
                             </h3>
                         </header>
                         <figure class="scrollmap-pane__fig">
@@ -149,18 +149,18 @@ let getRegionInfo = new Promise((resolve, reject) => {
                         </figure>
                         <div class="scrollmap-pane__content">
                             <p class="scrollmap-pane__description">
-                                ${data.features[i].description}
+                                ${data[i].description}
                             </p>
                             <div class="scrollmap-pane__btns">
                                 <a 
-                                    href="${data.features[i].wikiUrl}" 
+                                    href="${data[i].wikiUrl}" 
                                     class="scrollmap-pane__btn"
                                     target="_blank"
                                 >
                                     wiki info
                                 </a>
                                 <a 
-                                    href="${data.features[i].moreImagesUrl}" 
+                                    href="${data[i].moreImagesUrl}" 
                                     class="scrollmap-pane__btn"
                                     target="_blank"
                                 >

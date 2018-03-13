@@ -1,5 +1,4 @@
-{
-    "features": [
+[
         {
             "id": "guangdong",
             "title": "guangdong",
@@ -174,5 +173,5 @@
             },
             "fill": "#85144b"
         }
-    ]
-}
+]
+

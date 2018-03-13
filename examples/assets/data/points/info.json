@@ -1,5 +1,4 @@
-{
-    "features": [
+[
       {
         "id": "burj-khalifa",
         "title": "Burj Khalifa",
@@ -191,4 +190,3 @@
         }
       }
 ]
-}
