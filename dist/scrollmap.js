@@ -5,7 +5,9 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 var config = {
+
     mapboxAccessToken: 'pk.eyJ1IjoiYW9zaWthIiwiYSI6IjQzRGIxeEkifQ.7OvmyBbXwwt9Qxjlh9Qd3w'
+
 };
 
 exports.default = config;
@@ -4265,7 +4267,9 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
             if (this.isMobile) {
                 elPos = window.scrollY > bounds.top && bounds.top < window.innerHeight && bounds.bottom - this.options.mapConfig.offset - parseInt($('.scrollmap-content').css('margin-top')) > 0;
             } else {
-                elPos = window.scrollY > bounds.top && bounds.top < window.innerHeight && bounds.bottom - this.options.mapConfig.offset > 0;
+                elPos = window.scrollY > bounds.top && bounds.top < window.innerHeight &&
+                // (bounds.bottom > 0);
+                bounds.bottom - this.options.mapConfig.offset > 0;
             }
 
             return elPos;
@@ -4429,7 +4433,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
             }
 
             // set the offset for the scroll to pane
-            var offset = $('.scrollmap-pane[data-id="' + this.activeId + '"]')[0].offsetTop - this.options.mapConfig.offset;
+            var offset = window.scrollY + $('.scrollmap-pane[data-id="' + this.activeId + '"]')[0].getBoundingClientRect().top - this.options.mapConfig.offset;
 
             // Notify that scrolling has been initiated
             this.isScrolling = true;

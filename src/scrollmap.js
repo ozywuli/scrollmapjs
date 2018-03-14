@@ -398,8 +398,11 @@ import _findIndex from 'lodash/findIndex';
             } else {
                 elPos = (window.scrollY > bounds.top) && 
                     (bounds.top < window.innerHeight) && 
+                    // (bounds.bottom > 0);
                     (bounds.bottom - this.options.mapConfig.offset > 0);
             }
+
+
 
             return elPos;
         }, // isElementOnScreen
@@ -556,7 +559,7 @@ import _findIndex from 'lodash/findIndex';
             }
 
             // set the offset for the scroll to pane
-            let offset = $(`.scrollmap-pane[data-id="${this.activeId}"]`)[0].offsetTop - this.options.mapConfig.offset;
+            let offset = window.scrollY + $(`.scrollmap-pane[data-id="${this.activeId}"]`)[0].getBoundingClientRect().top - this.options.mapConfig.offset;
 
             // Notify that scrolling has been initiated
             this.isScrolling = true;
