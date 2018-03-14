@@ -115,7 +115,6 @@ import _findIndex from 'lodash/findIndex';
         allowPan: true,
         isScrolling: false,
         isMobile: true,
-        mapOffset: null,
         isToggled: false,
         geometryType: null,
 
@@ -308,8 +307,6 @@ import _findIndex from 'lodash/findIndex';
             let scrollmapEl = document.querySelector('.scrollmap-map');
             let scrollmapElStyle = window.getComputedStyle(scrollmapEl);
             let height = scrollmapElStyle.getPropertyValue('height');
-            
-            this.mapOffset = parseInt(height);
         }, // getMapHeight()
 
 
@@ -559,13 +556,13 @@ import _findIndex from 'lodash/findIndex';
             }
 
             // set the offset for the scroll to pane
-            let offset = $(`.scrollmap-pane[data-id="${this.activeId}"]`)[0].offsetTop - 24;
+            let offset = $(`.scrollmap-pane[data-id="${this.activeId}"]`)[0].offsetTop - this.options.mapConfig.offset;
 
             // Notify that scrolling has been initiated
             this.isScrolling = true;
 
             // animate scroll to the pane
-            $('html').animate({
+            $('html, body').animate({
                 scrollTop: offset
             }, 150, () => {
                 // Notify that scrolling has been completed

@@ -5,9 +5,7 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 var config = {
-
     mapboxAccessToken: 'pk.eyJ1IjoiYW9zaWthIiwiYSI6IjQzRGIxeEkifQ.7OvmyBbXwwt9Qxjlh9Qd3w'
-
 };
 
 exports.default = config;
@@ -3963,7 +3961,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
         allowPan: true,
         isScrolling: false,
         isMobile: true,
-        mapOffset: null,
         isToggled: false,
         geometryType: null,
 
@@ -4172,8 +4169,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
             var scrollmapEl = document.querySelector('.scrollmap-map');
             var scrollmapElStyle = window.getComputedStyle(scrollmapEl);
             var height = scrollmapElStyle.getPropertyValue('height');
-
-            this.mapOffset = parseInt(height);
         },
         // getMapHeight()
 
@@ -4434,13 +4429,13 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
             }
 
             // set the offset for the scroll to pane
-            var offset = $('.scrollmap-pane[data-id="' + this.activeId + '"]')[0].offsetTop - 24;
+            var offset = $('.scrollmap-pane[data-id="' + this.activeId + '"]')[0].offsetTop - this.options.mapConfig.offset;
 
             // Notify that scrolling has been initiated
             this.isScrolling = true;
 
             // animate scroll to the pane
-            $('html').animate({
+            $('html, body').animate({
                 scrollTop: offset
             }, 150, function () {
                 // Notify that scrolling has been completed
