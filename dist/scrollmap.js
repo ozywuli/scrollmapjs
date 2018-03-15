@@ -4263,14 +4263,15 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
         isElementOnScreen: function isElementOnScreen(paneEl) {
             var bounds = paneEl.getBoundingClientRect();
             var elPos = void 0;
+            var mobileOffset = 0;
 
             if (this.isMobile) {
-                elPos = window.scrollY > bounds.top && bounds.top < window.innerHeight && bounds.bottom - this.options.mapConfig.offset - parseInt($('.scrollmap-content').css('margin-top')) > 0;
+                mobileOffset = parseInt($('.scrollmap-content').css('margin-top'));
             } else {
-                elPos = window.scrollY > bounds.top && bounds.top < window.innerHeight &&
-                // (bounds.bottom > 0);
-                bounds.bottom - this.options.mapConfig.offset > 0;
+                mobileOffset = 0;
             }
+
+            elPos = window.scrollY > bounds.top && bounds.top < window.innerHeight && bounds.bottom - this.options.mapConfig.offset - mobileOffset > 0;
 
             return elPos;
         },
@@ -4433,7 +4434,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
             }
 
             // set the offset for the scroll to pane
-            var offset = window.scrollY + $('.scrollmap-pane[data-id="' + this.activeId + '"]')[0].getBoundingClientRect().top - this.options.mapConfig.offset;
+            var offset = $('.scrollmap-pane[data-id="' + this.activeId + '"]')[0].offsetTop - parseInt($('.scrollmap-pane').css('marginBottom'));
 
             // Notify that scrolling has been initiated
             this.isScrolling = true;
@@ -4441,7 +4442,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
             // animate scroll to the pane
             $('html, body').animate({
                 scrollTop: offset
-            }, 150, function () {
+            }, 250, function () {
                 // Notify that scrolling has been completed
                 _this9.isScrolling = false;
             });

@@ -390,19 +390,17 @@ import _findIndex from 'lodash/findIndex';
         isElementOnScreen(paneEl) {
             let bounds = paneEl.getBoundingClientRect();
             let elPos;
+            let mobileOffset = 0;
 
             if (this.isMobile) {
-                elPos = (window.scrollY > bounds.top) && 
-                    (bounds.top < window.innerHeight) && 
-                    (bounds.bottom - this.options.mapConfig.offset - parseInt($('.scrollmap-content').css('margin-top')) > 0);
+                mobileOffset = parseInt($('.scrollmap-content').css('margin-top'));
             } else {
-                elPos = (window.scrollY > bounds.top) && 
-                    (bounds.top < window.innerHeight) && 
-                    // (bounds.bottom > 0);
-                    (bounds.bottom - this.options.mapConfig.offset > 0);
+                mobileOffset = 0;
             }
 
-
+            elPos = (window.scrollY > bounds.top) && 
+                (bounds.top < window.innerHeight) && 
+                (bounds.bottom - this.options.mapConfig.offset - mobileOffset > 0);
 
             return elPos;
         }, // isElementOnScreen
@@ -559,7 +557,7 @@ import _findIndex from 'lodash/findIndex';
             }
 
             // set the offset for the scroll to pane
-            let offset = window.scrollY + $(`.scrollmap-pane[data-id="${this.activeId}"]`)[0].getBoundingClientRect().top - this.options.mapConfig.offset;
+            let offset = $(`.scrollmap-pane[data-id="${this.activeId}"]`)[0].offsetTop - parseInt($('.scrollmap-pane').css('marginBottom'));
 
             // Notify that scrolling has been initiated
             this.isScrolling = true;
@@ -567,7 +565,7 @@ import _findIndex from 'lodash/findIndex';
             // animate scroll to the pane
             $('html, body').animate({
                 scrollTop: offset
-            }, 150, () => {
+            }, 250, () => {
                 // Notify that scrolling has been completed
                 this.isScrolling = false;
             });
