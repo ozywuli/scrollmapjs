@@ -20,10 +20,11 @@ import _findIndex from 'lodash/findIndex';
 // the anonymous function protects the `$` alias from name collisions
 ;(function( $, window, document, undefined ) {
     /**
-     * Plugin name
+     * Plugin namespace
      */
-    let pluginName = 'Scrollmap';
-
+    let namespace = {
+        pluginName: 'Scrollmap'
+    };
 
     /**
      * Default Options
@@ -83,7 +84,7 @@ import _findIndex from 'lodash/findIndex';
     /**
      * Scrollmap constructor
      */
-    let Scrollmap = function( userOptions ) {
+    namespace['pluginName'] = function( userOptions ) {
         // Combine/merge default and user options
         this.options = $.extend( true, defaultOptions, userOptions );
 
@@ -105,7 +106,7 @@ import _findIndex from 'lodash/findIndex';
     /**
      * Protoype for ScrollMap
      */
-    Scrollmap.prototype = {
+    namespace['pluginName'].prototype = {
         /*------------------------------------*\
           State
         \*------------------------------------*/
@@ -188,9 +189,10 @@ import _findIndex from 'lodash/findIndex';
 
             // Check if geojson containers either points or polygons
             if (this.geometryType === "point") {
+                let featuresLength = this.options.geojson.features;
                 // Add markers to map
                 this.options.geojson.features.forEach((marker, index) => {
-                    this.generateMarker(marker, index);
+                    this.generateMarker(marker, index, featuresLength);
                 })
                 // Add marker click event
                 this.initMarkerClickEvent();
@@ -261,7 +263,7 @@ import _findIndex from 'lodash/findIndex';
                 for (let i = 0; i < markerImgEl.length; i++) {
                     markerImgEl[i].style.opacity = 0.5;
                     markerImgEl[i].style.backgroundImage = `url(${this.options.markerConfig.images.default})`;
-                    markerEl[i].style.zIndex = 10 - i;
+                    markerEl[i].style.zIndex = markerImgEl.length - i;
                 }
             } else if (this.geometryType === "polygon" || this.geometryType === "multipolygon") {
                 this.options.geojson.features.forEach((polygon, index) => {
@@ -323,7 +325,7 @@ import _findIndex from 'lodash/findIndex';
                 for (let i = 0; i < markerImgEl.length; i++) {
                     markerImgEl[i].style.opacity = 0.5;
                     markerImgEl[i].style.backgroundImage = `url(${this.options.markerConfig.images.default})`;
-                    markerEl[i].style.zIndex = 10 - i;
+                    markerEl[i].style.zIndex = markerImgEl.length - i;
                 }
 
                 $(`.marker[data-id=${activeId}]`).css({
@@ -408,14 +410,14 @@ import _findIndex from 'lodash/findIndex';
         /**
          * Generate a map marker
          */
-        generateMarker(marker, index) {
-            // console.log('generate marker');
+        generateMarker(marker, index, featuresLength) {
+
             // Make marker element
             let markerEl = document.createElement('div');
                 markerEl.className = 'marker';
                 markerEl.style.width = this.options.markerConfig.dimensions.width;
                 markerEl.style.height = this.options.markerConfig.dimensions.height;
-                markerEl.style.zIndex = 10 - index;
+                markerEl.style.zIndex = featuresLength - index;
                 markerEl.dataset.id = marker.properties.id;
 
             // Make marker image
@@ -612,6 +614,6 @@ import _findIndex from 'lodash/findIndex';
     /*------------------------------------*\
       Export 
     \*------------------------------------*/
-    module.exports = Scrollmap;
+    module.exports = namespace['pluginName'];
 
 })( jQuery, window , document );

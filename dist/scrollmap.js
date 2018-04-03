@@ -3871,9 +3871,11 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 ;(function ($, window, document, undefined) {
     /**
-     * Plugin name
+     * Plugin namespace
      */
-    var pluginName = 'Scrollmap';
+    var namespace = {
+        pluginName: 'Scrollmap'
+    };
 
     /**
      * Default Options
@@ -3932,7 +3934,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
         /**
          * Scrollmap constructor
          */
-    };var Scrollmap = function Scrollmap(userOptions) {
+    };namespace['pluginName'] = function (userOptions) {
         // Combine/merge default and user options
         this.options = $.extend(true, defaultOptions, userOptions);
 
@@ -3953,7 +3955,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
     /**
      * Protoype for ScrollMap
      */
-    Scrollmap.prototype = {
+    namespace['pluginName'].prototype = {
         /*------------------------------------*\
           State
         \*------------------------------------*/
@@ -4042,9 +4044,10 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
             // Check if geojson containers either points or polygons
             if (this.geometryType === "point") {
+                var featuresLength = this.options.geojson.features;
                 // Add markers to map
                 this.options.geojson.features.forEach(function (marker, index) {
-                    _this2.generateMarker(marker, index);
+                    _this2.generateMarker(marker, index, featuresLength);
                 });
                 // Add marker click event
                 this.initMarkerClickEvent();
@@ -4120,7 +4123,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
                 for (var i = 0; i < markerImgEl.length; i++) {
                     markerImgEl[i].style.opacity = 0.5;
                     markerImgEl[i].style.backgroundImage = 'url(' + this.options.markerConfig.images.default + ')';
-                    markerEl[i].style.zIndex = 10 - i;
+                    markerEl[i].style.zIndex = markerImgEl.length - i;
                 }
             } else if (this.geometryType === "polygon" || this.geometryType === "multipolygon") {
                 this.options.geojson.features.forEach(function (polygon, index) {
@@ -4190,7 +4193,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
                 for (var i = 0; i < markerImgEl.length; i++) {
                     markerImgEl[i].style.opacity = 0.5;
                     markerImgEl[i].style.backgroundImage = 'url(' + this.options.markerConfig.images.default + ')';
-                    markerEl[i].style.zIndex = 10 - i;
+                    markerEl[i].style.zIndex = markerImgEl.length - i;
                 }
 
                 $('.marker[data-id=' + activeId + ']').css({
@@ -4280,14 +4283,14 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
         /**
          * Generate a map marker
          */
-        generateMarker: function generateMarker(marker, index) {
-            // console.log('generate marker');
+        generateMarker: function generateMarker(marker, index, featuresLength) {
+
             // Make marker element
             var markerEl = document.createElement('div');
             markerEl.className = 'marker';
             markerEl.style.width = this.options.markerConfig.dimensions.width;
             markerEl.style.height = this.options.markerConfig.dimensions.height;
-            markerEl.style.zIndex = 10 - index;
+            markerEl.style.zIndex = featuresLength - index;
             markerEl.dataset.id = marker.properties.id;
 
             // Make marker image
@@ -4489,7 +4492,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
     /*------------------------------------*\
       Export 
     \*------------------------------------*/
-    module.exports = Scrollmap;
+    module.exports = namespace['pluginName'];
 })(jQuery, window, document);
 
 },{"../config":1,"./utils/getCentroid":127,"lodash/debounce":98,"lodash/find":100,"lodash/findIndex":101,"lodash/throttle":121}],127:[function(require,module,exports){
