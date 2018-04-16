@@ -3839,9 +3839,13 @@ var _config = require('../config');
 
 var _config2 = _interopRequireDefault(_config);
 
-var _getCentroid = require('./utils/getCentroid');
+var _getCentroid = require('woohaus-utility-belt/lib/getCentroid');
 
 var _getCentroid2 = _interopRequireDefault(_getCentroid);
+
+var _ToggleMap = require('woohaus-utility-belt/lib/ToggleMap');
+
+var _ToggleMap2 = _interopRequireDefault(_ToggleMap);
 
 var _debounce2 = require('lodash/debounce');
 
@@ -3865,15 +3869,15 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 // net against concatenated scripts and/or other plugins
 // that are not closed properly.
 // the anonymous function protects the `$` alias from name collisions
-/**
- * Scrollmap.js
- * @author Ozy Wu-Li - @ousikaa
- * @description Scrolling map
- */
+; /**
+   * Scrollmap.js
+   * @author Ozy Wu-Li - @ousikaa
+   * @description Scrolling map
+   */
 
 // https://github.com/jquery-boilerplate/jquery-patterns/blob/master/patterns/jquery.basic.plugin-boilerplate.js
 
-;(function ($, window, document, undefined) {
+(function ($, window, document, undefined) {
     /**
      * Plugin namespace
      */
@@ -3889,6 +3893,10 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
         geoinfo: null,
         data: null,
         throttleSpeed: 500,
+
+        mapId: '.js-scrollmap',
+        mapClass: '.js-scrollmap-map',
+        mapContent: '.js-scrollmap-content',
 
         /**
          * Mapbox configuration
@@ -3971,6 +3979,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
         isMobile: true,
         isToggled: false,
         geometryType: null,
+        ToggleMap: null,
 
         /**
          * Init
@@ -3982,7 +3991,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
             this.assignDynaMap();
             this.getMapHeight();
             this.instantiateMap();
-            this.initToggleEvent();
         },
         // init()
 
@@ -4023,7 +4031,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
             mapboxgl.accessToken = _config2.default.mapboxAccessToken;
             // Instantiate mapbox
             map = new mapboxgl.Map(this.options.mapboxConfig);
-            map.scrollZoom.disable();
             map.doubleClickZoom.disable();
             map.addControl(new mapboxgl.NavigationControl(), 'top-right');
 
@@ -4081,8 +4088,19 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
             // trigger scroll after map finishes loading
             this.scrollHandler();
             this.addScrollListener();
+
+            this.ToggleMap = new _ToggleMap2.default();
+
+            this.ToggleMap.initToggleEventBinder(map, this.toggleEventCallback.bind(this));
         },
         // afterMapLoad()
+
+        /**
+         * Toggle Event callback
+         */
+        toggleEventCallback: function toggleEventCallback() {
+            this.isToggled = this.ToggleMap.isToggled;
+        },
 
 
         /**
@@ -4164,7 +4182,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
             $(window).on('resize.scrollmap', function () {
                 _this4.checkScreenSize();
                 if (_this4.isToggled) {
-                    _this4.toggleMap();
+                    _this4.isToggled = _this4.ToggleMap.toggle(_this4.map);
                 }
             });
         },
@@ -4175,7 +4193,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
          * Get the height of the map
          */
         getMapHeight: function getMapHeight() {
-            var scrollmapEl = document.querySelector('.scrollmap-map');
+            var scrollmapEl = document.querySelector(this.options.mapClass);
             var scrollmapElStyle = window.getComputedStyle(scrollmapEl);
             var height = scrollmapElStyle.getPropertyValue('height');
         },
@@ -4273,7 +4291,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
             var mobileOffset = 0;
 
             if (this.isMobile) {
-                mobileOffset = parseInt($('.scrollmap-content').css('margin-top'));
+                mobileOffset = parseInt($(this.options.mapContent).css('margin-top'));
             } else {
                 mobileOffset = 0;
             }
@@ -4335,9 +4353,9 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
         initMarkerClickEvent: function initMarkerClickEvent() {
             var _this7 = this;
 
-            $('#scrollmap').on('click', '.marker', function (event) {
+            $(this.options.mapId).on('click', '.marker', function (event) {
                 if (_this7.isToggled) {
-                    _this7.toggleMap();
+                    _this7.isToggled = _this7.ToggleMap.toggle(_this7.map);
                     window.setTimeout(function () {
                         _this7.scrollMap(event);
                     }, 200);
@@ -4409,7 +4427,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
             this.map.on('click', polygon.properties.name.replace(/\s+/g, '-').toLowerCase(), function (event) {
                 if (_this8.isToggled) {
-                    _this8.toggleMap();
+                    _this8.isToggled = _this8.ToggleMap.toggle(_this8.map);
                     window.setTimeout(function () {
                         _this8.scrollMap(event);
                     }, 200);
@@ -4453,42 +4471,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
                 // Notify that scrolling has been completed
                 _this9.isScrolling = false;
             });
-        },
-        // scrollmap()
-
-
-        /**
-         * Initialize map toggle event
-         */
-        initToggleEvent: function initToggleEvent() {
-            $('.scrollmap__toggle-map').on('click', this.toggleMap.bind(this));
-        },
-        // initToggleEvent()
-
-
-        /**
-         * Toggles the map
-         */
-        toggleMap: function toggleMap() {
-            if (!this.isToggled) {
-                $('.scrollmap-controls').addClass('is-toggled');
-                $('.scrollmap-map').css('height', '100%');
-                $('.scrollmap-content').css('display', 'none');
-                $('.scrollmap-controls').css({
-                    'position': 'fixed',
-                    'top': 'auto',
-                    'bottom': 0
-                });
-                this.isToggled = true;
-            } else {
-                $('.scrollmap-controls').removeClass('is-toggled');
-                $('.scrollmap-map, .scrollmap-content, .scrollmap-controls').removeAttr('style');
-                this.isToggled = false;
-            }
-
-            // Resize the map
-            this.map.resize();
-        } // toggleMap()
+        } // scrollmap()
 
     }; // Scrollmap.prototype
 
@@ -4499,7 +4482,64 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
     module.exports = namespace['pluginName'];
 })(jQuery, window, document);
 
-},{"../config":1,"./utils/getCentroid":127,"lodash/debounce":98,"lodash/find":100,"lodash/findIndex":101,"lodash/throttle":121}],127:[function(require,module,exports){
+},{"../config":1,"lodash/debounce":98,"lodash/find":100,"lodash/findIndex":101,"lodash/throttle":121,"woohaus-utility-belt/lib/ToggleMap":127,"woohaus-utility-belt/lib/getCentroid":128}],127:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.default = ToggleMap;
+function ToggleMap(userOptions) {
+    var _this = this;
+
+    /**
+     * Default Options
+     */
+    var defaultOptions = {
+        $mapSidebar: $('.map-sidebar'),
+        mapSidebarMap: '.js-map-sidebar-map',
+        mapSidebarContent: '.js-map-sidebar-content',
+        mapSidebarControls: '.js-map-sidebar-controls'
+    };
+
+    /**
+     * Merge user options with default options
+     */
+    var options = Object.assign(defaultOptions, userOptions);
+
+    this.isToggled = false;
+
+    this.initToggleEventBinder = function (map, cb) {
+        $('.js-map-sidebar-toggle').on('click', _this.toggleEvent.bind(_this, map, cb));
+    };
+    this.toggleEvent = function (map, cb) {
+        _this.toggle(map);
+        cb();
+    };
+    this.toggle = function (map, cb) {
+        if (!_this.isToggled) {
+            options.$mapSidebar.addClass('is-toggled');
+            $(options.mapSidebarMap).css('height', '100%');
+            $(options.mapSidebarContent).css('display', 'none');
+            $(options.mapSidebarControls).css({
+                'position': 'fixed',
+                'top': 'auto',
+                'bottom': 0
+            });
+            _this.isToggled = true;
+        } else {
+            options.$mapSidebar.removeClass('is-toggled');
+            $(options.mapSidebarMap + ', ' + options.mapSidebarContent + ', ' + options.mapSidebarControls).removeAttr('style');
+            _this.isToggled = false;
+        }
+
+        // // Resize the map
+        map.resize();
+
+        return _this.isToggled;
+    };
+}
+},{}],128:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -4529,6 +4569,5 @@ exports.default = function (arr) {
     var sixSignedArea = 3 * twoTimesSignedArea;
     return [cxTimes6SignedArea / sixSignedArea, cyTimes6SignedArea / sixSignedArea];
 };
-
 },{}]},{},[126])(126)
 });

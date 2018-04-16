@@ -7,7 +7,8 @@
 // https://github.com/jquery-boilerplate/jquery-patterns/blob/master/patterns/jquery.basic.plugin-boilerplate.js
 
 import config from '../config';
-import getCentroid from './utils/getCentroid';
+import getCentroid from 'woohaus-utility-belt/lib/getCentroid';
+import ToggleMap from 'woohaus-utility-belt/lib/ToggleMap';
 import _debounce from 'lodash/debounce';
 import _throttle from 'lodash/throttle';
 import _find from 'lodash/find';
@@ -26,6 +27,7 @@ import _findIndex from 'lodash/findIndex';
         pluginName: 'Scrollmap'
     };
 
+
     /**
      * Default Options
      */
@@ -34,6 +36,10 @@ import _findIndex from 'lodash/findIndex';
         geoinfo: null,
         data: null,
         throttleSpeed: 500,
+
+        mapId: '.js-scrollmap',
+        mapClass: '.js-scrollmap-map',
+        mapContent: '.js-scrollmap-content',
 
         /**
          * Mapbox configuration
@@ -118,6 +124,7 @@ import _findIndex from 'lodash/findIndex';
         isMobile: true,
         isToggled: false,
         geometryType: null,
+        ToggleMap: null,
 
 
         /**
@@ -130,7 +137,6 @@ import _findIndex from 'lodash/findIndex';
             this.assignDynaMap();
             this.getMapHeight();
             this.instantiateMap();
-            this.initToggleEvent();
         }, // init()
 
 
@@ -166,9 +172,8 @@ import _findIndex from 'lodash/findIndex';
             mapboxgl.accessToken = config.mapboxAccessToken;
             // Instantiate mapbox
             map = new mapboxgl.Map(this.options.mapboxConfig);
-                map.scrollZoom.disable();
-                map.doubleClickZoom.disable();
-                map.addControl(new mapboxgl.NavigationControl(), 'top-right');
+            map.doubleClickZoom.disable();
+            map.addControl(new mapboxgl.NavigationControl(), 'top-right');
 
             this.map = map;
 
@@ -221,8 +226,18 @@ import _findIndex from 'lodash/findIndex';
             // trigger scroll after map finishes loading
             this.scrollHandler();
             this.addScrollListener();
+
+            this.ToggleMap = new ToggleMap();
+
+            this.ToggleMap.initToggleEventBinder(map, this.toggleEventCallback.bind(this));
         }, // afterMapLoad()
 
+        /**
+         * Toggle Event callback
+         */
+        toggleEventCallback() {
+            this.isToggled = this.ToggleMap.isToggled;
+        },
 
         /**
          * Handles the scroll event
@@ -296,7 +311,7 @@ import _findIndex from 'lodash/findIndex';
             $(window).on('resize.scrollmap', () => {
                 this.checkScreenSize();
                 if (this.isToggled) {
-                    this.toggleMap()
+                    this.isToggled = this.ToggleMap.toggle(this.map);
                 }
             });
         }, // initWindowResizeEvent()
@@ -306,7 +321,7 @@ import _findIndex from 'lodash/findIndex';
          * Get the height of the map
          */
         getMapHeight() {
-            let scrollmapEl = document.querySelector('.scrollmap-map');
+            let scrollmapEl = document.querySelector(this.options.mapClass);
             let scrollmapElStyle = window.getComputedStyle(scrollmapEl);
             let height = scrollmapElStyle.getPropertyValue('height');
         }, // getMapHeight()
@@ -395,7 +410,7 @@ import _findIndex from 'lodash/findIndex';
             let mobileOffset = 0;
 
             if (this.isMobile) {
-                mobileOffset = parseInt($('.scrollmap-content').css('margin-top'));
+                mobileOffset = parseInt($(this.options.mapContent).css('margin-top'));
             } else {
                 mobileOffset = 0;
             }
@@ -458,9 +473,9 @@ import _findIndex from 'lodash/findIndex';
          * Initialize marker click event
          */
         initMarkerClickEvent() {
-            $('#scrollmap').on('click', '.marker', (event) => {
+            $(this.options.mapId).on('click', '.marker', (event) => {
                 if (this.isToggled) {
-                    this.toggleMap()
+                    this.isToggled = this.ToggleMap.toggle(this.map);
                     window.setTimeout(() => {
                         this.scrollMap(event);
                     }, 200)
@@ -530,7 +545,7 @@ import _findIndex from 'lodash/findIndex';
         initPolygonClickEvent(polygon, index) {
             this.map.on('click', polygon.properties.name.replace(/\s+/g, '-').toLowerCase(), (event) => {
                 if (this.isToggled) {
-                    this.toggleMap()
+                    this.isToggled = this.ToggleMap.toggle(this.map);
                     window.setTimeout(() => {
                         this.scrollMap(event);
                     }, 200)
@@ -571,40 +586,7 @@ import _findIndex from 'lodash/findIndex';
                 // Notify that scrolling has been completed
                 this.isScrolling = false;
             });
-        }, // scrollmap()
-
-
-        /**
-         * Initialize map toggle event
-         */
-        initToggleEvent() {
-            $('.scrollmap__toggle-map').on('click', this.toggleMap.bind(this));
-        }, // initToggleEvent()
-
-
-        /**
-         * Toggles the map
-         */
-        toggleMap() {
-            if (!this.isToggled) {
-                $('.scrollmap-controls').addClass('is-toggled');
-                $('.scrollmap-map').css('height', '100%');
-                $('.scrollmap-content').css('display', 'none');
-                $('.scrollmap-controls').css({
-                    'position': 'fixed',
-                    'top': 'auto',
-                    'bottom': 0
-                });
-                this.isToggled = true;
-            } else {
-                $('.scrollmap-controls').removeClass('is-toggled');
-                $('.scrollmap-map, .scrollmap-content, .scrollmap-controls').removeAttr('style');
-                this.isToggled = false;
-            }
-
-            // Resize the map
-            this.map.resize();
-        } // toggleMap()
+        } // scrollmap()
 
     } // Scrollmap.prototype
 
