@@ -3902,7 +3902,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
          * Mapbox configuration
          */
         mapboxConfig: {
-            container: 'scrollmap',
+            container: 'map',
             style: 'mapbox://styles/aosika/cj8tmsx9cdk3m2rqmxbq8gr1b'
         }, // mapboxConfig
 
@@ -4514,7 +4514,9 @@ function ToggleMap(userOptions) {
     };
     this.toggleEvent = function (map, cb) {
         _this.toggle(map);
-        cb();
+        if (cb) {
+            cb();
+        }
     };
     this.toggle = function (map, cb) {
         if (!_this.isToggled) {

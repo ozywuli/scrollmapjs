@@ -45,7 +45,7 @@ import _findIndex from 'lodash/findIndex';
          * Mapbox configuration
          */
         mapboxConfig: {
-            container: 'scrollmap',
+            container: 'map',
             style: 'mapbox://styles/aosika/cj8tmsx9cdk3m2rqmxbq8gr1b'
         }, // mapboxConfig
 
