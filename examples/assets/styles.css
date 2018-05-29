@@ -115,8 +115,7 @@ html {
   background-size: cover;
   opacity: 0.5; }
 
-/*------------------------------------*\
-  Recommended
+/*------------------------------------*  Recommended
 \*------------------------------------*/
 .scrollmap-recommended__list-item {
   margin-bottom: 24px; }
@@ -145,8 +144,7 @@ html {
   font-size: 2.4rem;
   margin-bottom: 1.2rem; }
 
-/*------------------------------------*\
-  Scrollmap Controls
+/*------------------------------------*  Scrollmap Controls
 \*------------------------------------*/
 .scrollmap-controls {
   position: fixed;

@@ -1,13 +1,11 @@
-(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.Scrollmap = f()}})(function(){var define,module,exports;return (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
+(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.Scrollmap = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
 var config = {
-
     mapboxAccessToken: 'pk.eyJ1IjoiYW9zaWthIiwiYSI6IjQzRGIxeEkifQ.7OvmyBbXwwt9Qxjlh9Qd3w'
-
 };
 
 exports.default = config;
@@ -1852,13 +1850,10 @@ var reIsUint = /^(?:0|[1-9]\d*)$/;
  * @returns {boolean} Returns `true` if `value` is a valid index, else `false`.
  */
 function isIndex(value, length) {
-  var type = typeof value;
   length = length == null ? MAX_SAFE_INTEGER : length;
-
   return !!length &&
-    (type == 'number' ||
-      (type != 'symbol' && reIsUint.test(value))) &&
-        (value > -1 && value % 1 == 0 && value < length);
+    (typeof value == 'number' || reIsUint.test(value)) &&
+    (value > -1 && value % 1 == 0 && value < length);
 }
 
 module.exports = isIndex;
@@ -2520,7 +2515,8 @@ module.exports = stackSet;
 var memoizeCapped = require('./_memoizeCapped');
 
 /** Used to match property names within property paths. */
-var rePropName = /[^.[\]]+|\[(?:(-?\d+(?:\.\d+)?)|(["'])((?:(?!\2)[^\\]|\\.)*?)\2)\]|(?=(?:\.|\[\])(?:\.|\[\]|$))/g;
+var reLeadingDot = /^\./,
+    rePropName = /[^.[\]]+|\[(?:(-?\d+(?:\.\d+)?)|(["'])((?:(?!\2)[^\\]|\\.)*?)\2)\]|(?=(?:\.|\[\])(?:\.|\[\]|$))/g;
 
 /** Used to match backslashes in property paths. */
 var reEscapeChar = /\\(\\)?/g;
@@ -2534,11 +2530,11 @@ var reEscapeChar = /\\(\\)?/g;
  */
 var stringToPath = memoizeCapped(function(string) {
   var result = [];
-  if (string.charCodeAt(0) === 46 /* . */) {
+  if (reLeadingDot.test(string)) {
     result.push('');
   }
-  string.replace(rePropName, function(match, number, quote, subString) {
-    result.push(quote ? subString.replace(reEscapeChar, '$1') : (number || match));
+  string.replace(rePropName, function(match, number, quote, string) {
+    result.push(quote ? string.replace(reEscapeChar, '$1') : (number || match));
   });
   return result;
 });
@@ -2707,11 +2703,9 @@ function debounce(func, wait, options) {
   function remainingWait(time) {
     var timeSinceLastCall = time - lastCallTime,
         timeSinceLastInvoke = time - lastInvokeTime,
-        timeWaiting = wait - timeSinceLastCall;
+        result = wait - timeSinceLastCall;
 
-    return maxing
-      ? nativeMin(timeWaiting, maxWait - timeSinceLastInvoke)
-      : timeWaiting;
+    return maxing ? nativeMin(result, maxWait - timeSinceLastInvoke) : result;
   }
 
   function shouldInvoke(time) {
@@ -3835,6 +3829,95 @@ module.exports = toString;
 },{"./_baseToString":38}],126:[function(require,module,exports){
 'use strict';
 
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.default = ToggleMap;
+function ToggleMap(userOptions) {
+    var _this = this;
+
+    /**
+     * Default Options
+     */
+    var defaultOptions = {
+        $mapSidebar: $('.map-sidebar'),
+        mapSidebarMap: '.js-map-sidebar-map',
+        mapSidebarContent: '.js-map-sidebar-content',
+        mapSidebarControls: '.js-map-sidebar-controls'
+    };
+
+    /**
+     * Merge user options with default options
+     */
+    var options = Object.assign(defaultOptions, userOptions);
+
+    this.isToggled = false;
+
+    this.initToggleEventBinder = function (map, cb) {
+        $('.js-map-sidebar-toggle').on('click', _this.toggleEvent.bind(_this, map, cb));
+    };
+    this.toggleEvent = function (map, cb) {
+        _this.toggle(map);
+        if (cb) {
+            cb();
+        }
+    };
+    this.toggle = function (map, cb) {
+        if (!_this.isToggled) {
+            options.$mapSidebar.addClass('is-toggled');
+            $(options.mapSidebarMap).css('height', '100%');
+            $(options.mapSidebarContent).css('display', 'none');
+            $(options.mapSidebarControls).css({
+                'position': 'fixed',
+                'top': 'auto',
+                'bottom': 0
+            });
+            _this.isToggled = true;
+        } else {
+            options.$mapSidebar.removeClass('is-toggled');
+            $(options.mapSidebarMap + ', ' + options.mapSidebarContent + ', ' + options.mapSidebarControls).removeAttr('style');
+            _this.isToggled = false;
+        }
+
+        // // Resize the map
+        map.resize();
+
+        return _this.isToggled;
+    };
+}
+},{}],127:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+exports.default = function (arr) {
+    var twoTimesSignedArea = 0;
+    var cxTimes6SignedArea = 0;
+    var cyTimes6SignedArea = 0;
+
+    var length = arr.length;
+
+    var x = function x(i) {
+        return arr[i % length][0];
+    };
+    var y = function y(i) {
+        return arr[i % length][1];
+    };
+
+    for (var i = 0; i < arr.length; i++) {
+        var twoSA = x(i) * y(i + 1) - x(i + 1) * y(i);
+        twoTimesSignedArea += twoSA;
+        cxTimes6SignedArea += (x(i) + x(i + 1)) * twoSA;
+        cyTimes6SignedArea += (y(i) + y(i + 1)) * twoSA;
+    }
+    var sixSignedArea = 3 * twoTimesSignedArea;
+    return [cxTimes6SignedArea / sixSignedArea, cyTimes6SignedArea / sixSignedArea];
+};
+},{}],128:[function(require,module,exports){
+'use strict';
+
 var _config = require('../config');
 
 var _config2 = _interopRequireDefault(_config);
@@ -3846,10 +3929,6 @@ var _getCentroid2 = _interopRequireDefault(_getCentroid);
 var _ToggleMap = require('woohaus-utility-belt/lib/ToggleMap');
 
 var _ToggleMap2 = _interopRequireDefault(_ToggleMap);
-
-var _debounce2 = require('lodash/debounce');
-
-var _debounce3 = _interopRequireDefault(_debounce2);
 
 var _throttle2 = require('lodash/throttle');
 
@@ -3869,14 +3948,16 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 // net against concatenated scripts and/or other plugins
 // that are not closed properly.
 // the anonymous function protects the `$` alias from name collisions
-; /**
-   * Scrollmap.js
-   * @author Ozy Wu-Li - @ousikaa
-   * @description Scrolling map
-   */
+/**
+ * Scrollmap.js
+ * @author Ozy Wu-Li - @ousikaa
+ * @description Scrolling map
+ */
 
 // https://github.com/jquery-boilerplate/jquery-patterns/blob/master/patterns/jquery.basic.plugin-boilerplate.js
 
+;
+// import _debounce from 'lodash/debounce';
 (function ($, window, document, undefined) {
     /**
      * Plugin namespace
@@ -3894,7 +3975,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
         data: null,
         throttleSpeed: 500,
 
-        mapId: '.js-scrollmap',
         mapClass: '.js-scrollmap-map',
         mapContent: '.js-scrollmap-content',
 
@@ -4353,7 +4433,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
         initMarkerClickEvent: function initMarkerClickEvent() {
             var _this7 = this;
 
-            $(this.options.mapId).on('click', '.marker', function (event) {
+            $(this.options.mapClass).on('click', '.marker', function (event) {
                 if (_this7.isToggled) {
                     _this7.isToggled = _this7.ToggleMap.toggle(_this7.map);
                     window.setTimeout(function () {
@@ -4482,94 +4562,5 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
     module.exports = namespace['pluginName'];
 })(jQuery, window, document);
 
-},{"../config":1,"lodash/debounce":98,"lodash/find":100,"lodash/findIndex":101,"lodash/throttle":121,"woohaus-utility-belt/lib/ToggleMap":127,"woohaus-utility-belt/lib/getCentroid":128}],127:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.default = ToggleMap;
-function ToggleMap(userOptions) {
-    var _this = this;
-
-    /**
-     * Default Options
-     */
-    var defaultOptions = {
-        $mapSidebar: $('.map-sidebar'),
-        mapSidebarMap: '.js-map-sidebar-map',
-        mapSidebarContent: '.js-map-sidebar-content',
-        mapSidebarControls: '.js-map-sidebar-controls'
-    };
-
-    /**
-     * Merge user options with default options
-     */
-    var options = Object.assign(defaultOptions, userOptions);
-
-    this.isToggled = false;
-
-    this.initToggleEventBinder = function (map, cb) {
-        $('.js-map-sidebar-toggle').on('click', _this.toggleEvent.bind(_this, map, cb));
-    };
-    this.toggleEvent = function (map, cb) {
-        _this.toggle(map);
-        if (cb) {
-            cb();
-        }
-    };
-    this.toggle = function (map, cb) {
-        if (!_this.isToggled) {
-            options.$mapSidebar.addClass('is-toggled');
-            $(options.mapSidebarMap).css('height', '100%');
-            $(options.mapSidebarContent).css('display', 'none');
-            $(options.mapSidebarControls).css({
-                'position': 'fixed',
-                'top': 'auto',
-                'bottom': 0
-            });
-            _this.isToggled = true;
-        } else {
-            options.$mapSidebar.removeClass('is-toggled');
-            $(options.mapSidebarMap + ', ' + options.mapSidebarContent + ', ' + options.mapSidebarControls).removeAttr('style');
-            _this.isToggled = false;
-        }
-
-        // // Resize the map
-        map.resize();
-
-        return _this.isToggled;
-    };
-}
-},{}],128:[function(require,module,exports){
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-exports.default = function (arr) {
-    var twoTimesSignedArea = 0;
-    var cxTimes6SignedArea = 0;
-    var cyTimes6SignedArea = 0;
-
-    var length = arr.length;
-
-    var x = function x(i) {
-        return arr[i % length][0];
-    };
-    var y = function y(i) {
-        return arr[i % length][1];
-    };
-
-    for (var i = 0; i < arr.length; i++) {
-        var twoSA = x(i) * y(i + 1) - x(i + 1) * y(i);
-        twoTimesSignedArea += twoSA;
-        cxTimes6SignedArea += (x(i) + x(i + 1)) * twoSA;
-        cyTimes6SignedArea += (y(i) + y(i + 1)) * twoSA;
-    }
-    var sixSignedArea = 3 * twoTimesSignedArea;
-    return [cxTimes6SignedArea / sixSignedArea, cyTimes6SignedArea / sixSignedArea];
-};
-},{}]},{},[126])(126)
+},{"../config":1,"lodash/find":100,"lodash/findIndex":101,"lodash/throttle":121,"woohaus-utility-belt/lib/ToggleMap":126,"woohaus-utility-belt/lib/getCentroid":127}]},{},[128])(128)
 });
