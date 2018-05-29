@@ -26,12 +26,13 @@
   },
   "devDependencies": {
     "gulp": "^3.9.1",
-    "gulp-jumpstart": "0.0.5"
+    "gulp-jumpstart": "0.0.7"
   },
   "dependencies": {
     "lodash": "^4.17.4",
     "object-assign": "^4.1.1",
     "raf": "^3.4.0",
-    "reset.css": "^2.0.2"
+    "reset.css": "^2.0.2",
+    "woohaus-utility-belt": "0.0.5"
   }
 }

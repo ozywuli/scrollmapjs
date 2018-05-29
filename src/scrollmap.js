@@ -9,7 +9,7 @@
 import config from '../config';
 import getCentroid from 'woohaus-utility-belt/lib/getCentroid';
 import ToggleMap from 'woohaus-utility-belt/lib/ToggleMap';
-import _debounce from 'lodash/debounce';
+// import _debounce from 'lodash/debounce';
 import _throttle from 'lodash/throttle';
 import _find from 'lodash/find';
 import _findIndex from 'lodash/findIndex';
@@ -37,7 +37,6 @@ import _findIndex from 'lodash/findIndex';
         data: null,
         throttleSpeed: 500,
 
-        mapId: '.js-scrollmap',
         mapClass: '.js-scrollmap-map',
         mapContent: '.js-scrollmap-content',
 
@@ -473,7 +472,7 @@ import _findIndex from 'lodash/findIndex';
          * Initialize marker click event
          */
         initMarkerClickEvent() {
-            $(this.options.mapId).on('click', '.marker', (event) => {
+            $(this.options.mapClass).on('click', '.marker', (event) => {
                 if (this.isToggled) {
                     this.isToggled = this.ToggleMap.toggle(this.map);
                     window.setTimeout(() => {
